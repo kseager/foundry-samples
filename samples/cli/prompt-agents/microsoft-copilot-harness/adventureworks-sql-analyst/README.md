@@ -1,6 +1,6 @@
 # AdventureWorks SQL Analyst
 
-A GitHub Copilot harness Prompt Agent that explores the AdventureWorksLT sample database through a
+A Microsoft Copilot harness Prompt Agent that explores the AdventureWorksLT sample database through a
 read-only Azure SQL managed connector exposed as a Connector Namespace MCP server.
 
 One `azd up` creates:
@@ -17,8 +17,9 @@ server.
 
 ## Prerequisites
 
-- Azure Developer CLI (`azd`) 1.34.2 or later.
-- The Microsoft Foundry `azd` extension pack. The sample pins `azure.ai.agents` 1.0.0-beta.19.
+- Azure Developer CLI (`azd`) 1.36.0 or later.
+- The Microsoft Foundry `azd` extension pack. The sample pins `azure.ai.agents` 1.0.0-beta.21
+  and `azure.ai.projects` 1.0.0-beta.14.
 - Azure CLI authenticated to the target tenant.
 - `sqlcmd` for the post-provision database permission grant.
 - Permission to create Microsoft Foundry, Azure SQL, and Connector Namespace resources and to set a
@@ -137,6 +138,17 @@ read permissions in the database. Agent instructions further restrict generated 
 The SQL firewall allows Azure services so the managed connector can reach the public database
 endpoint. When `DEPLOYER_IP_ADDRESS` is set, the post-provision hook temporarily permits that one IP
 for the local SQL grant and removes the rule afterward.
+
+## Validated result
+
+On October 19, 2026, a clean Canada Central deployment completed in 4 minutes 58 seconds with
+azd 1.36.0, Agents beta.21, and Projects beta.14. The persisted Agent used
+`microsoft_copilot_preview`, the Microsoft toolset, and the immutable analysis Skill.
+The database contained 295 products; the top-five query returned the Road-150 variants at 3578.27.
+A SQL query through the connector confirmed reader membership, no writer membership, and no
+database UPDATE permission. Only `AllowAzureServices` remained after the temporary firewall
+cleanup. One invocation returned only a completion summary; explicitly requesting the actual rows
+returned the expected table.
 
 ## Clean up
 

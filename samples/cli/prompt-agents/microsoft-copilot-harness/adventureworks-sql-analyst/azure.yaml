@@ -1,9 +1,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
 requiredVersions:
-  azd: '>=1.34.2'
+  azd: '>=1.36.0'
   extensions:
-    azure.ai.agents: '1.0.0-beta.19'
+    azure.ai.agents: '1.0.0-beta.21'
+    azure.ai.projects: '1.0.0-beta.14'
     azure.ai.connections: '>=1.0.0-beta.8'
 
 name: adventureworks-sql-analyst
@@ -61,7 +62,7 @@ services:
     description: Explore and analyze the AdventureWorksLT sample database through read-only Azure SQL connector tools.
     model: gpt-5.4-mini
     harness:
-      type: github_copilot_preview
+      type: microsoft_copilot_preview
     skills:
       - adventureworks-analysis
     instructions: |
@@ -78,7 +79,7 @@ services:
       instead of retrieving every row. State which tables you used and distinguish database facts
       from your interpretation. If a tool fails, report the tool error rather than inventing data.
     tools:
-      - type: github_copilot_toolset_preview
+      - type: microsoft_copilot_toolset_preview
         defaultConfig:
           enabled: false
         configs:
