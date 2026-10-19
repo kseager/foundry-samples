@@ -1,6 +1,6 @@
 # Browser Automation Blog Research
 
-A GitHub Copilot harness Prompt Agent that uses a Foundry Browser Automation Toolbox to inspect the
+A Microsoft Copilot harness Prompt Agent that uses a Foundry Browser Automation Toolbox to inspect the
 rendered Microsoft Foundry developer blog. The sample intentionally uses azd instead of relying on
 the Portal tool picker.
 
@@ -14,7 +14,7 @@ One `azd up` creates:
 - a secretless `PlaywrightWorkspace` project connection to the workspace's remote MCP endpoint;
 - a Toolbox containing the GA `browser_automation` tool;
 - a same-project RemoteTool connection to the Toolbox MCP endpoint; and
-- a Prompt Agent using `harness.type: github_copilot_preview` with every harness-native built-in
+- a Prompt Agent using `harness.type: microsoft_copilot_preview` with every harness-native built-in
   disabled.
 
 The agent must create a managed browser session, inspect the rendered page, and close the session.
@@ -72,13 +72,13 @@ https://<foundry-account>.services.ai.azure.com/api/projects/<project>/toolboxes
 browser-automation-toolbox/versions/1/mcp?api-version=v1
 ```
 
-The GitHub Copilot harness Prompt Agent connects to this Foundry Toolbox endpoint through a
+The Copilot harness Prompt Agent connects to this Foundry Toolbox endpoint through a
 `RemoteTool` project connection. That outer connection uses a user Entra token with audience
 `https://ai.azure.com`. The Agent never receives the Playwright credential directly.
 
 ```mermaid
 flowchart LR
-  U[User request] --> A[GitHub Copilot harness Prompt Agent]
+  U[User request] --> A[Microsoft Copilot harness Prompt Agent]
     A -->|MCP + Foundry connection| T[Foundry Toolbox MCP endpoint]
     T -->|browser_automation + Playwright connection| P[Playwright workspace MCP endpoint]
     P --> B[Ephemeral remote browser session]
@@ -87,7 +87,7 @@ flowchart LR
 
 ### Runtime sequence
 
-1. The GitHub Copilot harness Agent calls the Foundry Toolbox operation
+1. The Copilot harness Agent calls the Foundry Toolbox operation
   `browser___create_browser_session`.
 2. The Toolbox invokes the Playwright workspace MCP server and returns a `browserSessionId`.
 3. The Agent reuses that ID for `browser___browser_navigate` and
@@ -100,11 +100,11 @@ There are therefore two project connections and two MCP boundaries:
 | Boundary | Project connection | Purpose |
 | --- | --- | --- |
 | Foundry Toolbox -> Playwright workspace | `BrowserAutomationBlog` (`PlaywrightWorkspace`) | Authenticates browser-session operations at the workspace MCP endpoint |
-| GitHub Copilot harness Agent -> Foundry Toolbox | `BrowserAutomationToolbox` (`RemoteTool`) | Makes the versioned Toolbox operations available to the Agent |
+| Copilot harness Agent -> Foundry Toolbox | `BrowserAutomationToolbox` (`RemoteTool`) | Makes the versioned Toolbox operations available to the Agent |
 
 ### Direct Agent attachment
 
-Foundry also supports adding Browser Automation directly to a GitHub Copilot harness Prompt Agent,
+Foundry also supports adding Browser Automation directly to a Copilot harness Prompt Agent,
 without a customer-created Toolbox. In that path the Browser Automation dialog creates or selects a
 `PlaywrightWorkspace` project connection and saves this first-class tool entry on the Agent:
 
@@ -136,7 +136,7 @@ by a Playwright workspace.
 
 The agent declares the Toolbox MCP connection explicitly. In the original beta.18 validation,
 listing the Toolbox only under the agent's `uses:` dependencies did not add it to the saved Prompt
-Agent definition. The beta.19-pinned sample retains the explicit MCP entry for that reason.
+Agent definition. This sample retains the explicit MCP entry for that reason.
 
 The Toolbox namespaces the inner BAT operations as `browser___<operation>`. The outer MCP
 `allowed_tools` list must use those published names, such as
@@ -145,16 +145,17 @@ The Toolbox namespaces the inner BAT operations as `browser___<operation>`. The 
 
 ## Prerequisites
 
-- Azure Developer CLI 1.35.0 or later
-- The Microsoft Foundry azd extension pack. The sample pins `azure.ai.agents` 1.0.0-beta.19.
+- Azure Developer CLI 1.36.0 or later
+- The Microsoft Foundry azd extension pack. The sample pins `azure.ai.agents` 1.0.0-beta.21
+  and `azure.ai.projects` 1.0.0-beta.14.
 - Azure CLI authenticated to the target tenant
-- A subscription enabled for the `github_copilot_preview` Prompt Agent harness
+- A subscription enabled for the `microsoft_copilot_preview` Prompt Agent harness
 - Permission to create Foundry and Playwright workspace resources and
   `Microsoft.Authorization/roleAssignments/write`
 - At least 1,000 GPT-5.4 Global Standard capacity units in the selected Foundry region. The sample
   requests that capacity and incurs model usage charges while deployed.
 
-The Foundry project defaults to Canada Central and must use a region where the GitHub Copilot
+The Foundry project defaults to Canada Central and must use a region where the Copilot
 harness is enabled for the selected subscription. The Playwright workspace separately defaults to
 East US through `PLAYWRIGHT_LOCATION`, which must be a Browser Automation region. Browser Automation
 is currently documented in `australiaeast`,
@@ -183,7 +184,7 @@ replace `canadacentral` in `azd env new`.
 The deployment uses project managed identity. It does not generate, persist, or prompt for a
 Playwright access token.
 
-If Agent creation returns HTTP 403 saying `github_copilot_preview` isn't enabled, select a Foundry
+If Agent creation returns HTTP 403 saying `microsoft_copilot_preview` isn't enabled, select a Foundry
 region where the harness is enabled for that subscription; changing only the Playwright region does
 not grant harness entitlement. If deployment reports
 `Microsoft.Authorization/roleAssignments/write`, use a subscription where you can assign
@@ -207,10 +208,11 @@ Treat the browser tool calls, not prose alone, as proof that BAT ran.
 
 ## Verified result
 
-The complete `azd up --no-prompt` path was tested on October 9, 2026 with Foundry in Canada Central
-and a Playwright workspace in East US. Deployment completed in 2 minutes 49 seconds and created the
-project, model deployment, workspace, workspace-scoped role assignment, both project connections,
-Toolbox, and Prompt Agent without an access token.
+The complete `azd up --no-prompt` path was tested on October 19, 2026 with Foundry in Canada Central
+and a Playwright workspace in East US, using azd 1.36.0, Agents beta.21, and Projects beta.14.
+Deployment completed in 2 minutes 55 seconds and created the project, model deployment, workspace,
+workspace-scoped role assignment, both project connections, Toolbox, and Prompt Agent without an
+access token. Readback preserved `microsoft_copilot_preview` and the Microsoft toolset.
 
 The successful invocation returned:
 
@@ -218,19 +220,20 @@ The successful invocation returned:
 - the first three current article titles and exact links from the rendered main content; and
 - a description of the rendered structure used to identify them.
 
-The response included a Playwright Live View URL and the Agent closed the browser session before
-returning. A second normal-mode invocation also opened the page, reported the rendered title, and
-closed the session.
+The response included a Playwright Live View URL. The persisted response was completed and contained
+successful MCP calls for session creation, navigation, content inspection, and session closure.
 
 The workflow uses these MCP operations:
 
 - `browser___create_browser_session`;
 - `browser___browser_navigate`;
+- `browser___browser_find`;
 - `browser___browser_snapshot`; and
 - `browser___close_browser_session`.
 
-An `azd ai agent invoke --output raw` retry failed to resolve the User Entra Toolbox connection. The
-documented normal invocation path is the validated path for this sample.
+An earlier validation observed a Toolbox connection-resolution error with `--output raw`.
+The October 19 test used the documented normal invocation and separately read the stored response
+to verify tool execution; raw-output invocation was not retested.
 
 Browser sessions are stateful and expire after inactivity. The instructions require a single session
 ID to be reused for the whole task and explicitly closed even when extraction fails.
