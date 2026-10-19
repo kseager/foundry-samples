@@ -12,4 +12,4 @@ Declarative **prompt agent** samples you deploy with [`azd`](https://aka.ms/azd)
 - [06-azure-search-rag](./06-azure-search-rag/) — RAG over Azure AI Search
 - [microsoft-copilot-harness](./microsoft-copilot-harness/) — end-to-end Microsoft Copilot harness scenarios
 
-Each sample's README notes whether it supports the GitHub Copilot harness.
+Each sample's README describes its Microsoft Copilot harness compatibility and validation limits.
