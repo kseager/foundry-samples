@@ -1,19 +1,23 @@
 # CSV and chart findings
 
-Date tested: 2026-10-09
+Date tested: 2026-10-19
 
 Environment:
 
 - Region: Canada Central
 - Model: `gpt-5.4-mini`
-- Agent extension: `azure.ai.agents` 1.0.0-beta.19
+- Azure Developer CLI: 1.36.0
+- Agent extension: `azure.ai.agents` 1.0.0-beta.21
+- Project extension: `azure.ai.projects` 1.0.0-beta.14
+- Harness: `microsoft_copilot_preview`
+- Toolset: `microsoft_copilot_toolset_preview`
 - Agent: `csv-chart-analyst`
 - Agent version: 1 in a fresh isolated project
 - Deployment: clean `azd up --no-prompt`, without manually setting project-context variables
 
 ## Result
 
-The GitHub Copilot harness completes the CSV-to-PNG workflow without Code Interpreter or per-file
+The Microsoft Copilot harness completes the CSV-to-PNG workflow without Code Interpreter or per-file
 Agent versions.
 
 | Test | Result |
@@ -29,10 +33,11 @@ Agent versions.
 
 ## Evidence
 
-The successful fresh-conversation test uploaded the 24-row CSV, staged it in the harness workspace,
-calculated West as the highest-total region at `378,300`, generated
-`regional_monthly_revenue_by_region.png`, uploaded it as a project file, and downloaded a valid
-1744×1025 RGBA PNG through the client.
+The successful two-turn test uploaded the 24-row CSV and staged it in the harness workspace.
+The first turn calculated West as the highest-total region at `378,300`. The second generated
+`revenue_by_month_and_region.png`, uploaded it as a project file, and downloaded a valid
+1785×1035 PNG (58,562 bytes) through the client. The post-deploy hook assigned the Agent identity
+**Foundry User** at project scope. The isolated environment was deleted and purged after testing.
 
 ## Current response compatibility
 

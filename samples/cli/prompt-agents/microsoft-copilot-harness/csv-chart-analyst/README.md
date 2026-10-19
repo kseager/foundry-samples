@@ -1,13 +1,13 @@
 # CSV Chart Analyst
 
-A GitHub Copilot harness Prompt Agent sample for a complete native file workflow: upload a CSV,
+A Microsoft Copilot harness Prompt Agent sample for a complete native file workflow: upload a CSV,
 attach it to a request, analyze it in the harness workspace, generate a PNG, upload the output to
 Foundry Files, and download it through the client.
 
 One `azd up` creates:
 
 - a Microsoft Foundry project and `gpt-5.4-mini` deployment;
-- one Prompt Agent using `harness.type: github_copilot_preview`;
+- one Prompt Agent using `harness.type: microsoft_copilot_preview`;
 - native file-read, file-write, and shell capabilities with all other harness built-ins disabled;
   and
 - a post-deploy role assignment granting the Agent identity **Foundry User** at project scope.
@@ -16,8 +16,8 @@ See [FINDINGS.md](FINDINGS.md) for the tested behavior and current caveats.
 
 ## Prerequisites
 
-- Azure Developer CLI (`azd`) 1.34.2 or later with the Microsoft Foundry extension pack. The sample
-  pins `azure.ai.agents` 1.0.0-beta.19.
+- Azure Developer CLI (`azd`) 1.36.0 or later with the Microsoft Foundry extension pack. The sample
+  pins `azure.ai.agents` 1.0.0-beta.21 and `azure.ai.projects` 1.0.0-beta.14.
 - Azure CLI authenticated to the target tenant.
 - Python 3.9 or later.
 - Permission to create Foundry resources, deploy Agent versions, and assign **Foundry User** at
@@ -112,9 +112,8 @@ through the project Files API, not the Code Interpreter Containers API.
 The included client path was tested end to end. Portal attachment filtering and generated-file UI
 behavior can differ by rollout and aren't required by this sample.
 
-The client sends the preview `Foundry-Features` header required by the tested GitHub Copilot harness
-endpoint. Replace that preview contract with the released API before publishing this client as a
-production pattern.
+The client sends `Foundry-Features: MicrosoftCopilot=V1Preview` for the Copilot harness
+preview endpoint. Review the preview API contract before adapting this client for production.
 
 ## Tear down
 
