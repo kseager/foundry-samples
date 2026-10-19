@@ -1,6 +1,6 @@
 # Web Research Email Digest
 
-An interactive GitHub Copilot harness agent that researches current public information with
+An interactive Microsoft Copilot harness agent that researches current public information with
 Microsoft Foundry Web Search and emails a concise, cited summary through Work IQ Mail.
 
 The sample deploys:
@@ -9,18 +9,19 @@ The sample deploys:
 - Microsoft Foundry Web Search, backed by Grounding with Bing Search;
 - a user-identity project connection for Work IQ User;
 - a user-identity project connection for Work IQ Mail;
-- a Prompt Agent that uses the GitHub Copilot harness;
+- a Prompt Agent that uses the Copilot harness;
 - an approval-free Mail send tool suitable for unattended execution; and
 - an enabled creator-identity Routine that emails its creator a daily Microsoft Foundry news digest
   at 8:00 AM Vancouver time.
 
-The agent explicitly disables the GitHub Copilot harness's native toolset. Its web results therefore
+The agent explicitly disables the Copilot harness's native toolset. Its web results therefore
 come from the declared Foundry `web_search` tool rather than the harness-native web capability.
 
 ## Prerequisites
 
-- Azure Developer CLI (`azd`) 1.34.2 or later.
-- The Microsoft Foundry `azd` extension pack. The sample pins `azure.ai.agents` 1.0.0-beta.19.
+- Azure Developer CLI (`azd`) 1.36.0 or later.
+- The Microsoft Foundry `azd` extension pack. The sample pins `azure.ai.agents` 1.0.0-beta.21
+  and `azure.ai.projects` 1.0.0-beta.14.
 - An Azure subscription where you can create Microsoft Foundry resources.
 - The commercial requirements for the Work IQ connections. Connector-backed Microsoft 365 tools
   can require a Microsoft 365 Copilot license for each calling user.
@@ -86,7 +87,7 @@ An exact address in the user prompt takes precedence. Otherwise, the agent calls
 `GetMyDetails` tool once and sends to the signed-in user's primary email address. It stops without
 sending when the profile result does not contain one unambiguous address.
 
-The pinned `azure.ai.agents` version includes the GitHub Copilot harness Conversation fix used by
+The pinned `azure.ai.agents` version includes the Copilot harness Conversation fix used by
 `azd ai agent invoke` and the camelCase harness-toolset authoring contract.
 
 The model deployment uses capacity 50 because a Work IQ turn can require several model/tool
@@ -106,6 +107,10 @@ address.
 The Routine uses `authorization.identity: creator`, so its unattended dispatches run as the
 Microsoft Entra identity that first creates it. Creator identity is create-only: later deployments
 preserve it, and changing the identity requires deleting and recreating the Routine.
+
+The tested service also rejects changes to an existing trigger definition, including its cron
+expression or time zone. To change those values, disable and delete the Routine, edit its
+`triggers` in `azure.yaml`, and redeploy it while signed in as the intended creator.
 
 If an existing Routine was created with released beta.9 or an earlier extension, enabling or
 redeploying it doesn't add creator identity. Delete the existing Routine, then run
@@ -174,11 +179,24 @@ identity and existing Work IQ User and Mail consent.
 The Bicep connection layer pins preview Work IQ catalog metadata. Verify those identifiers against a
 released provisioning contract before publishing this sample outside an approved preview audience.
 
-In an October 9, 2026 clean-environment validation, `azd up` deployed the Agent and enabled Routine,
-and a direct Agent invocation resolved the signed-in creator through Work IQ User. Manual dispatch
-returned an ID, but `azd ai routine run list` remained empty. That test didn't verify Routine
-execution or email delivery. Treat an accepted dispatch as submission evidence only; confirm a
-completed run or successful Mail tool call before relying on unattended delivery.
+On October 19, 2026, a clean Canada Central `azd up` completed in 2 minutes 33 seconds with
+azd 1.36.0, Agents beta.21, Projects beta.14, and Routines beta.10. Readback preserved
+`microsoft_copilot_preview`, the Microsoft toolset, creator identity, and the enabled 8:00 AM
+Vancouver schedule. A direct identity-only invocation resolved the signed-in user without
+sending mail.
+
+Manual Routine dispatch completed with four successful Web Search calls and a successful Mail
+call. Independent mailbox reads found the same non-draft message in Sent Items and Inbox.
+The beta.10 `run list` command still returned `value: null`, so use the completed Agent response
+and delivery evidence rather than treating that CLI output as proof that no run occurred.
+
+A separate disposable Routine with the same creator identity, Agent, and input was scheduled for
+a near-term daily trigger. Without a manual dispatch, it produced a completed Agent response,
+a successful Mail call, and a distinct message verified in both Sent Items and Inbox.
+Both test Routines were disabled and deleted before infrastructure teardown.
+
+The scheduled run made six Web Search calls despite the five-call instruction. The instruction
+is a model guideline, not an enforced execution budget; monitor actual tool usage and costs.
 
 ## Tear down
 

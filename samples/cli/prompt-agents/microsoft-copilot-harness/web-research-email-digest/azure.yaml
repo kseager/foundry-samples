@@ -1,9 +1,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
 requiredVersions:
-  azd: '>=1.34.2'
+  azd: '>=1.36.0'
   extensions:
-    azure.ai.agents: '1.0.0-beta.19'
+    azure.ai.agents: '1.0.0-beta.21'
+    azure.ai.projects: '1.0.0-beta.14'
     azure.ai.routines: '1.0.0-beta.10'
 
 name: personal-m365-productivity
@@ -43,7 +44,7 @@ services:
     description: Research current topics on the public web and email concise, cited summaries.
     model: gpt-5.4-mini
     harness:
-      type: github_copilot_preview
+      type: microsoft_copilot_preview
     instructions: |
       You research current topics on the public web and email concise summaries to the signed-in user.
 
@@ -78,7 +79,7 @@ services:
       images, gradients, decorative banners, or emoji. Keep the HTML under 15 KB and include no scripts
       or external styles. Do not send, reply to, forward, move, or delete any other email.
     tools:
-      - type: github_copilot_toolset_preview
+      - type: microsoft_copilot_toolset_preview
         defaultConfig:
           enabled: false
       - type: web_search
@@ -108,11 +109,11 @@ services:
     triggers:
       default:
         type: schedule
-        cron_expression: '0 8 * * *'
-        time_zone: America/Vancouver
+        cronExpression: '0 8 * * *'
+        timeZone: America/Vancouver
     action:
       type: invoke_agent_responses_api
-      agent_name: personal-m365-productivity
+      agentName: personal-m365-productivity
       input: |
         Use WorkIQ User to resolve the signed-in Routine creator's primary email address. If the
         tool does not return one unambiguous address, stop without sending mail and report why.

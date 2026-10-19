@@ -18,7 +18,7 @@ instructions, client or test flow, and cleanup guidance.
 
 Common requirements:
 
-- Azure Developer CLI (`azd`) and Azure CLI.
+- Azure Developer CLI (`azd`) 1.36.0 or later and Azure CLI.
 - The Microsoft Foundry `azd` extension pack.
 - An Azure subscription with access to the Copilot harness and quota for the sample's model.
 - Permission to create the resources and role assignments listed by the selected sample.
