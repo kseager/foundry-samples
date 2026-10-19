@@ -1,7 +1,7 @@
 # Quickstart: Web Research
 
 A complete, runnable version of the Microsoft Foundry quickstart for creating a Prompt Agent that
-uses the GitHub Copilot harness, declared Web Search, and a reusable Skill. Use this sample to inspect
+uses the Microsoft Copilot harness, declared Web Search, and a reusable Skill. Use this sample to inspect
 the finished project, follow the scenario without assembling files by hand, or run the same workflow
 as an automated smoke test.
 
@@ -9,7 +9,7 @@ One `azd up` creates:
 
 - a Microsoft Foundry account, project, and `gpt-5.4-mini` model deployment;
 - the immutable `official-source-research` Skill; and
-- the `web-research-agent` Prompt Agent with `harness.type: github_copilot_preview`, declared Web
+- the `web-research-agent` Prompt Agent with `harness.type: microsoft_copilot_preview`, declared Web
   Search, and the Skill attached.
 
 The sample leaves the harness-native tools enabled, matching the quickstart. The declared
@@ -17,11 +17,13 @@ The sample leaves the harness-native tools enabled, matching the quickstart. The
 
 ## Prerequisites
 
-- Azure Developer CLI (`azd`) 1.34.2 or later.
-- The Microsoft Foundry `azd` extension pack. The sample pins `azure.ai.agents` 1.0.0-beta.19.
+- Azure Developer CLI (`azd`) 1.36.0 or later.
+- The Microsoft Foundry `azd` extension pack. The sample pins `azure.ai.agents` 1.0.0-beta.21
+  and `azure.ai.projects` 1.0.0-beta.14.
 - Python 3.10 or later for the automated smoke test.
-- An Azure subscription with GitHub Copilot harness access and Global Standard quota for
-  `gpt-5.4-mini` in the selected Foundry region. The sample requests 50 capacity units.
+- An Azure subscription with Copilot harness access and Global Standard quota for
+  `gpt-5.4-mini` in the selected Foundry region. The sample requests 100 capacity units
+  (100,000 tokens per minute).
 - Contributor plus `Microsoft.Authorization/roleAssignments/write` permission, such as **User Access
   Administrator** or **Owner**, to create the isolated resources and initial project access.
 - The **Foundry User** role on the deployed project for Agent inspection and invocation.
@@ -45,9 +47,8 @@ azd up --no-prompt
 Canada Central is the tested default. Replace `canadacentral` when your subscription's harness
 entitlement, model quota, or data-location requirements use another supported region.
 
-Unlike the quickstart article, which adds an Agent and Skill to an existing project, this standalone
-sample provisions an isolated project and model so `azd up` and `azd down` cover the complete
-lifecycle.
+Like the quickstart article's new-project path, this sample provisions an isolated project and
+model so `azd up` and `azd down` cover the complete lifecycle.
 
 ## Try the quickstart scenario
 
@@ -76,7 +77,7 @@ The dependency-free test runner verifies both configuration and behavior:
 python3 scripts/smoke-test.py
 ```
 
-It checks that the deployed Agent is active and persists the GitHub Copilot harness, immutable Skill
+It checks that the deployed Agent is active and persists the Microsoft Copilot harness, immutable Skill
 version, and declared Web Search tool. It then starts a fresh conversation and requires a successful
 current-information answer with labeled version/date/change fields, a Python version, and citations
 to official release and What's New pages. It independently reads Python.org's current release list,
@@ -94,11 +95,11 @@ model and Web Search usage charges.
 
 ## Validated result
 
-On October 9, 2026, a clean Canada Central `azd up --no-prompt` completed in 1 minute 47 seconds.
-Readback showed an enabled Prompt Agent with active version 1, `github_copilot_preview`, immutable
-Skill version 1, and declared Web Search. The automated smoke test passed with the current Python
-3.15.0 release, its release date, two sourced changes, and official Python release and What's New
-citations.
+On October 19, 2026, a clean Canada Central `azd up --no-prompt` completed in 1 minute 58 seconds
+using azd 1.36.0, Agents beta.21, and Projects beta.14. Readback showed an enabled Prompt Agent
+with active version 1, `microsoft_copilot_preview`, immutable Skill version 1, and declared Web
+Search. The automated smoke test independently verified Python 3.15.0, its release date, two
+sourced changes, and official Python release and What's New URLs.
 
 ## Tear down
 

@@ -1,9 +1,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
 requiredVersions:
-  azd: '>=1.34.2'
+  azd: '>=1.36.0'
   extensions:
-    azure.ai.agents: '1.0.0-beta.19'
+    azure.ai.agents: '1.0.0-beta.21'
+    azure.ai.projects: '1.0.0-beta.14'
 
 name: quickstart-web-research
 
@@ -18,7 +19,7 @@ services:
           version: '2026-03-17'
         sku:
           name: GlobalStandard
-          capacity: 50
+          capacity: 100
 
   official-source-research:
     host: azure.ai.skill
@@ -35,7 +36,7 @@ services:
     description: Research current public information using authoritative sources.
     model: gpt-5.4-mini
     harness:
-      type: github_copilot_preview
+      type: microsoft_copilot_preview
     skills:
       - official-source-research
     instructions: >-
