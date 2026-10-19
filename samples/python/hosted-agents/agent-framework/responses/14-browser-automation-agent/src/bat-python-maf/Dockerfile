@@ -1,12 +1,10 @@
 FROM ghcr.io/astral-sh/uv:0.11.7 AS uv
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 COPY --from=uv /uv /uvx /bin/
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONIOENCODING=utf-8
-
-WORKDIR /app
 
 WORKDIR /app/user_agent
 COPY pyproject.toml uv.lock uv.toml ./

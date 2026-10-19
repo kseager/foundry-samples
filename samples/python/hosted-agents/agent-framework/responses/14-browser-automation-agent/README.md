@@ -30,7 +30,7 @@ No browser tool schema is hardcoded in this sample, and no local browser CLI or 
 
 - Azure CLI and Azure Developer CLI
 - An Azure AI Foundry project with a deployed chat model
-- **Python 3.13 or later** and [uv](https://docs.astral.sh/uv/getting-started/installation/) installed outside the project virtual environment for local development
+- **Python 3.11 or later** and [uv](https://docs.astral.sh/uv/getting-started/installation/) installed outside the project virtual environment for local development
 - Docker for local container builds
 
 The deployment hooks create the Playwright workspace when one is not supplied and assign the required roles after deployment.
