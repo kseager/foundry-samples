@@ -15,15 +15,11 @@ azd up
 azd ai agent invoke "Search the web for the latest stable Python release and cite the official Python release page."
 ```
 
-## Current validation blocker
+## Known limitation
 
-On October 19, 2026, a clean Canada Central `azd up` created the project, Toolbox, and Copilot
-harness agent. However, invocation failed during MCP discovery with HTTP 401.
-
-The `toolbox:` shortcut persisted a generic MCP tool with `require_approval: always` but without
-`project_connection_id`. This sample does not yet configure authentication from the Agent to the
-Foundry Toolbox endpoint. Deployment success alone is therefore not an end-to-end pass.
+The `toolbox:` shortcut adds an MCP endpoint without a `project_connection_id` to supply
+authentication. Invocation can fail during MCP discovery with HTTP 401 even when deployment
+succeeds. This sample does not yet configure authentication from the Agent to the Foundry Toolbox.
 
 See the [Browser Automation sample](../microsoft-copilot-harness/browser-automation-blog-research/)
-for an independently tested, explicit authenticated Toolbox MCP connection. Choosing and wiring
-that identity model into this minimal sample remains follow-up work.
+for an explicit authenticated Toolbox MCP connection.

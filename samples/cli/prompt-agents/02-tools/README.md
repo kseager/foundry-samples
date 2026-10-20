@@ -26,18 +26,13 @@ harness:
 ```
 
 Also set `strict: false` on each function tool. Strict function mode is not supported by the Copilot harness.
-Remove `toolChoice: auto` from that agent service as well; the tested Copilot harness rejects
+Remove `toolChoice: auto` from that agent service as well; the Copilot harness rejects
 an explicit `tool_choice` setting.
 
-## Validated result
+## Known limitations
 
-On October 19, 2026, the plain sample deployed in Canada Central and emitted
-`get_weather` with `{"city":"Seattle","unit":"celsius"}` and `convert_currency` with
-`{"amount":100,"from_currency":"USD","to_currency":"EUR"}`. A separate Copilot harness agent
-with non-strict tools and no `toolChoice` also emitted the same function and arguments through
-a foreground Responses request. A background Copilot request completed without returning the
-function call, so that path is not validated for client-executed tools.
+Use foreground Responses requests for client-executed function tools. Background Copilot requests
+can complete without returning the function call.
 
-The 10-capacity-unit model deployment can throttle repeated tests. A rate-limit failure does not
-mean the function schema is invalid. Function execution and result submission are not covered by
-this sample.
+The 10-capacity-unit model deployment can throttle repeated requests. A rate-limit failure does not
+mean the function schema is invalid.

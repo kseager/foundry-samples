@@ -32,20 +32,10 @@ The Microsoft Copilot harness accepts the `azure_ai_search` tool. To test it, cr
 named agent service with `harness.type: microsoft_copilot_preview` and omit `toolChoice`; an
 explicit `tool_choice` is not supported on that harness.
 
-## Validation boundary
+## Setup limitations
 
-On October 19, 2026, the default plain-agent configuration deployed in Canada Central, but its
-first query returned a Search access error. The saved tool retained the short connection name
-`aisearch-conn`, and the manifest did not specify a query type.
-
-A diagnostic copy supplied Search roles, the connection's full ARM resource ID, and
-`query_type: simple` on the index entry to match a seeded keyword index. Both the plain agent and
-a separately named Copilot harness agent then completed real `azure_ai_search_call` operations
-and correctly returned the synthetic index's 47-day return period, receipt requirement, and
-custom-product exclusion with citations.
-
-This demonstrates tool support in both runtimes, not a successful unmodified end-to-end setup.
-The diagnostic changed multiple prerequisites; it does not isolate a single cause of the initial
-access error. The connection-ID, identity, and query-mode setup still needs to be made explicit
-in the minimal sample. All test resources, including the separately created Search service, were
-removed afterward.
+The manifest leaves Search permissions, connection-ID resolution, and query-mode selection to
+your environment. If retrieval fails, verify the calling identity's Search roles, use the
+connection's full ARM resource ID for `project_connection_id`, and set a query type that matches
+the index. For a keyword-only index, use `query_type: simple` on the index entry. Do not assume
+the unspecified query mode works with every index.

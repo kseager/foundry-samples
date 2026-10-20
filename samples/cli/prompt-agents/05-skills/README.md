@@ -20,15 +20,8 @@ harness:
   type: microsoft_copilot_preview
 ```
 
-## Validated behavior
+## Known limitation
 
-On October 19, 2026, a clean Canada Central deployment published `travel-guide` version 1 and
-attached it to the plain Agent. That Agent returned a travel itinerary, but a follow-up asking for
-the skill's exact output sections reported that it could not access the skill content. A saved
-skill reference alone is not evidence that the plain runtime loaded it.
-
-A separately named Microsoft Copilot harness variant used the same skill dependency and visibly
-called `skill` with `{"skill":"travel-guide"}`. Its completed answer followed all six sections:
-Overview, Day-by-day itinerary, Neighborhoods, Food & drink, Practical tips, and Photo-worthy stops.
-Use that variant for the demonstrated skill-loading workflow. The test did not change the
-plain-agent default in this sample.
+The default plain Agent can generate an itinerary without loading the attached skill. For runtime
+skill loading, select the Copilot harness as described above and inspect the response for a
+`skill` call. A saved skill reference or plausible itinerary alone does not confirm skill use.

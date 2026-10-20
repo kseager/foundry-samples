@@ -12,8 +12,6 @@ One `azd up` creates:
   and
 - a post-deploy role assignment granting the Agent identity **Foundry User** at project scope.
 
-See [FINDINGS.md](FINDINGS.md) for the tested behavior and current caveats.
-
 ## Prerequisites
 
 - Azure Developer CLI (`azd`) 1.36.0 or later with the Microsoft Foundry extension pack. The sample
@@ -109,8 +107,8 @@ through the project Files API, not the Code Interpreter Containers API.
 | Generate and upload PNG | Yes |
 | Download PNG from Foundry Files | Yes |
 
-The included client path was tested end to end. Portal attachment filtering and generated-file UI
-behavior can differ by rollout and aren't required by this sample.
+Portal attachment filtering and generated-file UI behavior can differ by rollout. This sample uses
+the included client and does not require the Portal file UI.
 
 The client sends `Foundry-Features: MicrosoftCopilot=V1Preview` for the Copilot harness
 preview endpoint. Review the preview API contract before adapting this client for production.

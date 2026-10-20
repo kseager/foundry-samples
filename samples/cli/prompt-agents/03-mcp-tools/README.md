@@ -20,14 +20,8 @@ harness:
   type: microsoft_copilot_preview
 ```
 
-## Validation boundary
+## Troubleshooting
 
-On October 19, 2026, the plain sample and a separately named Copilot harness variant deployed
-in Canada Central. The Copilot response contained a successful
-`microsoft_docs_search` MCP call, but a subsequent model continuation hit `rate_limit_exceeded`.
-The plain invocation also throttled, including through the documented CLI command.
-
-The default 10-capacity-unit deployment was not sufficient for this test. Increasing only the
-disposable deployment's allocation did not produce a complete successful answer during the test
-window, so no minimum sufficient quota or end-to-end pass is claimed. Investigate the rate-limit
-response before treating tool-call success as a completed research result.
+The default 10-capacity-unit deployment can throttle multi-step research. If a response returns
+`rate_limit_exceeded`, check model quota and deployment rate limits before retrying. A successful
+MCP call does not guarantee that the final model response completed.

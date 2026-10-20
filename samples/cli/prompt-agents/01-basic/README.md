@@ -21,9 +21,3 @@ harness:
 ```
 
 Create a separate agent name when testing both variants in the same project.
-
-## Validated result
-
-On October 19, 2026, a clean Canada Central deployment passed using the pinned extensions.
-The default plain agent and a separately named Copilot harness variant both returned `391`
-for `17 * 23`. The isolated test environment was deleted and purged afterward.

@@ -134,9 +134,8 @@ missing Portal tile does not by itself establish that the runtime rejects Browse
 sample exercises the deployable service path directly through a Browser Automation Toolbox backed
 by a Playwright workspace.
 
-The agent declares the Toolbox MCP connection explicitly. In the original beta.18 validation,
-listing the Toolbox only under the agent's `uses:` dependencies did not add it to the saved Prompt
-Agent definition. This sample retains the explicit MCP entry for that reason.
+The agent declares an authenticated Toolbox MCP connection explicitly. Its `uses:` dependencies
+establish deployment order; the explicit MCP entry configures access to the Toolbox.
 
 The Toolbox namespaces the inner BAT operations as `browser___<operation>`. The outer MCP
 `allowed_tools` list must use those published names, such as
@@ -161,7 +160,7 @@ East US through `PLAYWRIGHT_LOCATION`, which must be a Browser Automation region
 is currently documented in `australiaeast`,
 `eastasia`, `eastus`, `japaneast`, `switzerlandnorth`, `westeurope`, and `westus3`.
 
-The tested configuration uses Foundry in `canadacentral` and Playwright in `eastus`. Keeping the
+The default configuration uses Foundry in `canadacentral` and Playwright in `eastus`. Keeping the
 locations separate matters when the two services don't have an enabled region in common for your
 subscription.
 
@@ -206,34 +205,10 @@ A successful response includes the rendered page title, three article links foun
 the requested page-structure description. The article titles will change as the blog is updated.
 Treat the browser tool calls, not prose alone, as proof that BAT ran.
 
-## Verified result
+## Known limitation
 
-The complete `azd up --no-prompt` path was tested on October 19, 2026 with Foundry in Canada Central
-and a Playwright workspace in East US, using azd 1.36.0, Agents beta.21, and Projects beta.14.
-Deployment completed in 2 minutes 55 seconds and created the project, model deployment, workspace,
-workspace-scoped role assignment, both project connections, Toolbox, and Prompt Agent without an
-access token. Readback preserved `microsoft_copilot_preview` and the Microsoft toolset.
-
-The successful invocation returned:
-
-- rendered title `Microsoft Foundry Blog`;
-- the first three current article titles and exact links from the rendered main content; and
-- a description of the rendered structure used to identify them.
-
-The response included a Playwright Live View URL. The persisted response was completed and contained
-successful MCP calls for session creation, navigation, content inspection, and session closure.
-
-The workflow uses these MCP operations:
-
-- `browser___create_browser_session`;
-- `browser___browser_navigate`;
-- `browser___browser_find`;
-- `browser___browser_snapshot`; and
-- `browser___close_browser_session`.
-
-An earlier validation observed a Toolbox connection-resolution error with `--output raw`.
-The October 19 test used the documented normal invocation and separately read the stored response
-to verify tool execution; raw-output invocation was not retested.
+If `azd ai agent invoke --output raw` fails to resolve the Toolbox connection, use the normal
+invocation command shown above.
 
 Browser sessions are stateful and expire after inactivity. The instructions require a single session
 ID to be reused for the whole task and explicitly closed even when extraction fails.

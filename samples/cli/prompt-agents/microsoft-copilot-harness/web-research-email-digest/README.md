@@ -91,11 +91,9 @@ The pinned `azure.ai.agents` version includes the Copilot harness Conversation f
 `azd ai agent invoke` and the camelCase harness-toolset authoring contract.
 
 The model deployment uses capacity 50 because a Work IQ turn can require several model/tool
-continuations. Capacity 10 produced masked throttling as a generic internal server error during
-end-to-end Mail validation. Keep capacity 50 as the sample default:
-the agent and Routine now limit each digest to five broad Web Search calls, which addresses the
-observed excessive-call pattern before consuming more quota. Consider increasing capacity only if
-a bounded run still reports `rate_limit_exceeded`.
+continuations. The agent and Routine instructions request at most five Web Search calls per
+digest, but this is not an enforced execution budget. Monitor actual tool usage and consider
+increasing capacity if bounded requests still report `rate_limit_exceeded`.
 
 ## Daily routine
 
@@ -108,7 +106,7 @@ The Routine uses `authorization.identity: creator`, so its unattended dispatches
 Microsoft Entra identity that first creates it. Creator identity is create-only: later deployments
 preserve it, and changing the identity requires deleting and recreating the Routine.
 
-The tested service also rejects changes to an existing trigger definition, including its cron
+The service also rejects changes to an existing trigger definition, including its cron
 expression or time zone. To change those values, disable and delete the Routine, edit its
 `triggers` in `azure.yaml`, and redeploy it while signed in as the intended creator.
 
@@ -169,7 +167,7 @@ Disable the Routine whenever unattended delivery isn't intended:
 azd ai routine disable daily-foundry-news-digest
 ```
 
-## Current boundary
+## Limitations
 
 The User MCP allowlists only `GetMyDetails`, and the Mail MCP allowlists only
 `SendEmailWithAttachments`, both with tool approval disabled for unattended delivery. Mailbox reads,
@@ -179,24 +177,9 @@ identity and existing Work IQ User and Mail consent.
 The Bicep connection layer pins preview Work IQ catalog metadata. Verify those identifiers against a
 released provisioning contract before publishing this sample outside an approved preview audience.
 
-On October 19, 2026, a clean Canada Central `azd up` completed in 2 minutes 33 seconds with
-azd 1.36.0, Agents beta.21, Projects beta.14, and Routines beta.10. Readback preserved
-`microsoft_copilot_preview`, the Microsoft toolset, creator identity, and the enabled 8:00 AM
-Vancouver schedule. A direct identity-only invocation resolved the signed-in user without
-sending mail.
-
-Manual Routine dispatch completed with four successful Web Search calls and a successful Mail
-call. Independent mailbox reads found the same non-draft message in Sent Items and Inbox.
-The beta.10 `run list` command still returned `value: null`, so use the completed Agent response
-and delivery evidence rather than treating that CLI output as proof that no run occurred.
-
-A separate disposable Routine with the same creator identity, Agent, and input was scheduled for
-a near-term daily trigger. Without a manual dispatch, it produced a completed Agent response,
-a successful Mail call, and a distinct message verified in both Sent Items and Inbox.
-Both test Routines were disabled and deleted before infrastructure teardown.
-
-The scheduled run made six Web Search calls despite the five-call instruction. The instruction
-is a model guideline, not an enforced execution budget; monitor actual tool usage and costs.
+Routines beta.10 can return `value: null` from `run list` even when execution and email delivery
+succeed. Inspect the completed Agent response and verify delivery rather than treating empty CLI
+history as proof that no run occurred.
 
 ## Tear down
 

@@ -44,7 +44,7 @@ azd env new quickstart-web-research-dev \
 azd up --no-prompt
 ```
 
-Canada Central is the tested default. Replace `canadacentral` when your subscription's harness
+Canada Central is the sample default. Replace `canadacentral` when your subscription's harness
 entitlement, model quota, or data-location requirements use another supported region.
 
 Like the quickstart article's new-project path, this sample provisions an isolated project and
@@ -92,14 +92,6 @@ contains a Web Search call.
 
 The test uses the active `azd` environment, makes a direct read-only request to Python.org, and incurs
 model and Web Search usage charges.
-
-## Validated result
-
-On October 19, 2026, a clean Canada Central `azd up --no-prompt` completed in 1 minute 58 seconds
-using azd 1.36.0, Agents beta.21, and Projects beta.14. Readback showed an enabled Prompt Agent
-with active version 1, `microsoft_copilot_preview`, immutable Skill version 1, and declared Web
-Search. The automated smoke test independently verified Python 3.15.0, its release date, two
-sourced changes, and official Python release and What's New URLs.
 
 ## Tear down
 
