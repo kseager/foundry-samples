@@ -14,10 +14,9 @@ azd env set AZURE_SEARCH_ENDPOINT https://<your-search>.search.windows.net
 azd env set AZURE_SEARCH_INDEX_NAME <your-index-name>
 ```
 
-The index query mode and identity permissions must also be configured. Follow the
-[Azure AI Search tool setup](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/ai-search)
-for keyless authentication and index requirements. This sample does not create the Search
-service, seed the index, or assign its Search roles.
+The calling identity (`authType: AAD`) must have **Search Index Data Reader** and **Search Service Contributor** roles on the Azure AI Search resource. See the [Azure AI Search tool setup](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/ai-search) for details. This sample does not create the Search service, seed the index, or assign its Search roles.
+
+The manifest sets `query_type: simple` on the index entry so keyword-only indexes work out of the box. Change `query_type` (for example, to `semantic`, `vector`, `vector_simple_hybrid`, or `vector_semantic_hybrid`) when your index is configured with a semantic configuration or integrated vectorizer.
 
 ## Deploy
 
@@ -28,14 +27,4 @@ azd ai agent invoke "What does the documentation say about the return policy?"
 
 ## Microsoft Copilot harness
 
-The Microsoft Copilot harness accepts the `azure_ai_search` tool. To test it, create a separately
-named agent service with `harness.type: microsoft_copilot_preview` and omit `toolChoice`; an
-explicit `tool_choice` is not supported on that harness.
-
-## Setup limitations
-
-The manifest leaves Search permissions, connection-ID resolution, and query-mode selection to
-your environment. If retrieval fails, verify the calling identity's Search roles, use the
-connection's full ARM resource ID for `project_connection_id`, and set a query type that matches
-the index. For a keyword-only index, use `query_type: simple` on the index entry. Do not assume
-the unspecified query mode works with every index.
+The Microsoft Copilot harness accepts the `azure_ai_search` tool. To use it, add `harness.type: microsoft_copilot_preview` to a separately named agent service in [`azure.yaml`](./azure.yaml) and omit `toolChoice` (an explicit `tool_choice` is not supported on that harness).

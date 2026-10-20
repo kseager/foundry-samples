@@ -3,8 +3,8 @@
 requiredVersions:
   azd: '>=1.36.0'
   extensions:
-    azure.ai.agents: '1.0.0-beta.21'
-    azure.ai.projects: '1.0.0-beta.14'
+    azure.ai.agents: '>=1.0.0-beta.21'
+    azure.ai.projects: '>=1.0.0-beta.14'
     azure.ai.connections: '>=1.0.0-beta.8'
 
 name: adventureworks-sql-analyst

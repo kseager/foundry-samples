@@ -11,28 +11,19 @@ azd up
 azd ai agent invoke "What is the weather in Seattle in celsius?"
 ```
 
-This sample does not include the application-side function implementations. An invocation can
-return a function request without a text answer; the CLI does not fetch live weather or execute
-currency conversion for you. Inspect the Responses output and implement the function-result
-round trip in your client.
+This sample does not include the application-side function implementations. An invocation
+emits a `function_call` item without a text answer; the CLI does not fetch live weather, execute
+currency conversion, or submit `function_call_output`. Pass `--new-conversation` when running
+consecutive CLI invocations, or implement the function-result round trip in your client.
 
 ## Microsoft Copilot harness
 
-To test non-strict function tools with the Microsoft Copilot harness, add this block to a separately named agent service in [`azure.yaml`](./azure.yaml):
+To use non-strict function tools with the Microsoft Copilot harness, add this block to a separately named agent service in [`azure.yaml`](./azure.yaml):
 
 ```yaml
 harness:
   type: microsoft_copilot_preview
 ```
 
-Also set `strict: false` on each function tool. Strict function mode is not supported by the Copilot harness.
-Remove `toolChoice: auto` from that agent service as well; the Copilot harness rejects
-an explicit `tool_choice` setting.
-
-## Known limitations
-
-Use foreground Responses requests for client-executed function tools. Background Copilot requests
-can complete without returning the function call.
-
-The 10-capacity-unit model deployment can throttle repeated requests. A rate-limit failure does not
-mean the function schema is invalid.
+Also set `strict: false` on each function tool (`strict: true` is not supported by the Copilot harness)
+and remove `toolChoice: auto` (the Copilot harness rejects an explicit `tool_choice` setting).

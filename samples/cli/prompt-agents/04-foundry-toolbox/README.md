@@ -14,12 +14,3 @@ extensions pinned by the manifest.
 azd up
 azd ai agent invoke "Search the web for the latest stable Python release and cite the official Python release page."
 ```
-
-## Known limitation
-
-The `toolbox:` shortcut adds an MCP endpoint without a `project_connection_id` to supply
-authentication. Invocation can fail during MCP discovery with HTTP 401 even when deployment
-succeeds. This sample does not yet configure authentication from the Agent to the Foundry Toolbox.
-
-See the [Browser Automation sample](../microsoft-copilot-harness/browser-automation-blog-research/)
-for an explicit authenticated Toolbox MCP connection.

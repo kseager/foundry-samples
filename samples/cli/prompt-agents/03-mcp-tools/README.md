@@ -19,9 +19,3 @@ To use the Microsoft Copilot harness, add this block to a separately named agent
 harness:
   type: microsoft_copilot_preview
 ```
-
-## Troubleshooting
-
-The default 10-capacity-unit deployment can throttle multi-step research. If a response returns
-`rate_limit_exceeded`, check model quota and deployment rate limits before retrying. A successful
-MCP call does not guarantee that the final model response completed.
