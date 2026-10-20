@@ -49,12 +49,25 @@ See [main.py](src/agent-framework-agent-with-foundry-toolbox-responses/main.py) 
    azd auth login
    ```
 
-The sample manifest declares three authenticated connections: `ghmcppat` (GitHub MCP, PAT), `langmcpconn` (Azure Language MCP, project managed identity), and `foundrymcpconn` (Foundry MCP, user Entra token). **Have the following two values ready before running `azd ai agent init`**; initialization prompts for them.
+The sample manifest declares three authenticated connections: `ghmcppat` (GitHub MCP, PAT), `langmcpconn` (Azure Language MCP, project managed identity), and `foundrymcpconn` (Foundry MCP, user Entra token). **Have the following two values ready** before running `azd ai agent init` as initialization prompts for them.
 
 | Prompt | How to obtain the value |
 |--------|-------------------------|
 | `GITHUB_MCP_PAT` | [Create a GitHub personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens). Prefer a fine-grained token limited to the repositories and permissions needed by the GitHub tools you intend to call (for example, read-only **Contents** access for reading repository files). Follow any organization approval or SSO requirements. See the [GitHub remote MCP server guide](https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md) for authentication details. Enter only the token, **without** the `Bearer ` prefix; the manifest adds it. |
-| `AZURE_LANGUAGE_MCP_ENDPOINT` | Create or use an existing [Azure Language resource](https://learn.microsoft.com/en-us/azure/ai-services/language-service/overview). In the [Azure portal](https://portal.azure.com/), open that resource's **Keys and Endpoint** page and copy its custom-subdomain endpoint, then append `language/mcp?api-version=2025-11-15-preview`. The complete URL should look like `https://<language-service>.cognitiveservices.azure.com/language/mcp?api-version=2025-11-15-preview`. Enter the full MCP URL, not just the resource endpoint or an API key. |
+| `AZURE_LANGUAGE_MCP_ENDPOINT` | Use an Azure **Language service** resource, not **Language Understanding** (LUIS). Follow the portal steps below to create the resource and obtain its full MCP URL. Enter the full MCP URL, not just the resource endpoint or an API key. |
+
+To create the Language resource and get its MCP URL:
+
+1. In the [Azure portal](https://portal.azure.com/), select **Create a resource**, search for **Language service**, and select the Microsoft offering. Alternatively, [open the Language resource creation page directly](https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics), as linked in the [official resource creation instructions](https://learn.microsoft.com/en-us/azure/ai-services/language-service/language-detection/quickstart#create-an-azure-resource).
+2. If the **Select additional features** page appears, select **Continue to create your resource**. Choose your subscription, resource group, region, resource name, and pricing tier; accept the required terms, then select **Review + create** > **Create**.
+3. After deployment, select **Go to resource** > **Keys and Endpoint** and copy the custom-subdomain endpoint, such as `https://<language-service>.cognitiveservices.azure.com/`.
+4. Append `language/mcp?api-version=2025-11-15-preview` to that endpoint. The value to enter for `AZURE_LANGUAGE_MCP_ENDPOINT` is:
+
+   ```text
+   https://<language-service>.cognitiveservices.azure.com/language/mcp?api-version=2025-11-15-preview
+   ```
+
+**Do not choose Language Understanding**: that is the older LUIS service, which retired on March 31, 2026, and is not used by this sample. See the [LUIS retirement notice](https://learn.microsoft.com/en-us/previous-versions/azure/ai-services/luis/what-is-luis) and the [Azure Language MCP server documentation](https://learn.microsoft.com/en-us/azure/ai-services/language-service/concepts/foundry-tools-agents#azure-language-mcp-server-preview).
 
 This sample does **not** provision the external Azure Language resource or create a GitHub PAT. Keep the PAT out of source control and do not share it in logs or screenshots.
 
