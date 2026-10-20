@@ -71,7 +71,9 @@ To create the Language resource and get its MCP URL:
 
 This sample does **not** provision the external Azure Language resource or create a GitHub PAT. Keep the PAT out of source control and do not share it in logs or screenshots.
 
-You also need permission to grant the Foundry **project's managed identity** access to the Language resource, or help from an administrator who can do so. This is done after provisioning below. The Foundry MCP connection needs no additional secret; it uses the calling user's Entra token and requires that user to have access to the target Foundry resources.
+This sample calls Azure Language using the Foundry **project's system-assigned managed identity**, not your signed-in user account. After provisioning, you must grant that identity the **Cognitive Services Language Owner** role on the **Language service resource** to invoke the Language MCP endpoint. You need permission to create Azure role assignments at that resource's scope (for example, **Role Based Access Control Administrator**, **User Access Administrator**, or **Owner**), or help from an administrator. Follow [Authorize the project managed identity](#authorize-the-project-managed-identity) below before invoking the agent.
+
+The separate Foundry MCP connection needs no additional secret; it uses the calling user's Entra token and requires that user to have access to the target Foundry resources.
 
 #### Initialize the agent project
 
@@ -111,9 +113,41 @@ azd provision
 
 #### Authorize the project managed identity
 
-On the **Azure Language resource**, open **Access control (IAM)** > **Add role assignment** and grant **Cognitive Services Language Owner** to the Foundry **project's system-assigned managed identity**. Use the project identity, not the parent Foundry account identity or your own user identity. An administrator may need to perform this assignment.
+The `langmcpconn` connection uses `ProjectManagedIdentity` authentication. Grant the **Foundry project's identity** access to the **Language service resource**, as follows.
 
-For identity lookup commands and the required Language data actions, see the [managed-identity authorization guide](../../../SUPPORTED_TOOLBOX_SCENARIOS/tools/mcp-microsoft-entra.md#step-2--authorize-the-identity). Allow time for the role assignment to propagate before invoking the agent.
+**1. Identify the project's managed identity**
+
+After `azd provision` completes:
+
+1. In the [Azure portal](https://portal.azure.com/), open your **Foundry project** resource, not the parent Foundry account.
+2. In the project's menu, select **Resource Management** > **Identity**.
+3. On the **System assigned** tab, copy the **Object (principal) ID**.
+
+This GUID identifies the project's managed identity. It is not the project's Azure resource ID or an application (client) ID. Do not substitute your user ID, the parent Foundry account's identity, or an agent-specific identity.
+
+**2. Assign the role on the Language resource**
+
+1. Open the **Language service resource** whose endpoint you supplied as `AZURE_LANGUAGE_MCP_ENDPOINT`.
+2. Select **Access control (IAM)** > **Add** > **Add role assignment**.
+3. Search for and select **Cognitive Services Language Owner**, then select **Next**.
+4. Under **Members**, choose **User, group, or service principal**, select **Select members**, and search using the **Object (principal) ID** copied above. Select the matching identity.
+5. Select **Review + assign** to complete the assignment.
+
+The assignment's **scope must be the Language service resource**, not the Foundry project. This grants Language API access without granting subscription-wide access. If **Add role assignment** is disabled or the assignment fails because you lack permission, ask an administrator to perform this step.
+
+**3. Wait for permissions to propagate**
+
+Allow several minutes for the assignment to propagate, then continue with deployment and invocation below. If the agent is already deployed, retry:
+
+```bash
+azd ai agent invoke "What tools do you have?"
+```
+
+Changing this role assignment does **not** require redeployment.
+
+If invocation fails with `language-mcp`, `HTTP_401`, and a message that a principal lacks `Microsoft.CognitiveServices/accounts/Language/mcp/action`, compare the principal ID in the error with the project's **Object (principal) ID** and verify the role was assigned on the correct Language resource. A failure from `language-mcp` can prevent discovery of **all** toolbox tools, even when the other sources succeed.
+
+For more background on the required Language data actions, see the [managed-identity authorization guide](../../../SUPPORTED_TOOLBOX_SCENARIOS/tools/mcp-microsoft-entra.md#step-2--authorize-the-identity).
 
 #### Deploy and invoke the agent
 
