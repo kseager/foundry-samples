@@ -61,6 +61,9 @@ param accountCapHost string = 'caphostacc'
 @description('Deploy a Log Analytics workspace + Application Insights, connect them to the Foundry account, and grant the project managed identity read access so evaluation can read agent traces (incl. GenAI content). Adds resources/cost. Default true.')
 param deployApplicationInsights bool = true
 
+@description('Optional full ARM resource ID of an existing workspace-based Application Insights component to connect instead of creating a new one. Ignored when deployApplicationInsights is false. The component is not modified; the deployer needs permission to assign roles on it.')
+param existingApplicationInsightsResourceId string = ''
+
 // Create a short, unique suffix, that will be unique to each resource group
 param deploymentTimestamp string = utcNow('yyyyMMddHHmmss')
 var uniqueSuffix = substring(uniqueString('${resourceGroup().id}-${deploymentTimestamp}'), 0, 4)
@@ -73,6 +76,12 @@ var aiSearchName = toLower('${uniqueSuffix}search')
 var azureStorageName = toLower('${uniqueSuffix}storage')
 var appInsightsName = toLower('${uniqueSuffix}appinsights')
 var logAnalyticsName = toLower('${uniqueSuffix}loganalytics')
+
+var appInsightsPassedIn = existingApplicationInsightsResourceId != ''
+var appInsightsParts = split(existingApplicationInsightsResourceId, '/')
+var appInsightsSubscriptionId = appInsightsPassedIn ? appInsightsParts[2] : subscription().subscriptionId
+var appInsightsResourceGroupName = appInsightsPassedIn ? appInsightsParts[4] : resourceGroup().name
+var targetAppInsightsName = appInsightsPassedIn ? appInsightsParts[8] : appInsightsName
 
 // Check if existing resources have been passed in
 var storagePassedIn = azureStorageAccountResourceId != ''
@@ -198,14 +207,16 @@ module applicationInsights 'modules-standard/application-insights.bicep' = if (d
     aiAccountName: aiAccount.outputs.accountName
     logAnalyticsName: logAnalyticsName
     appInsightsName: appInsightsName
+    existingApplicationInsightsResourceId: existingApplicationInsightsResourceId
   }
 }
 
 // Grant the project managed identity read access on App Insights (gated by deployApplicationInsights)
 module applicationInsightsRoleAssignment 'modules-standard/application-insights-role-assignment.bicep' = if (deployApplicationInsights) {
   name: 'app-insights-ra-${uniqueSuffix}-deployment'
+  scope: resourceGroup(appInsightsSubscriptionId, appInsightsResourceGroupName)
   params: {
-    appInsightsName: appInsightsName
+    appInsightsName: targetAppInsightsName
     projectPrincipalId: aiProject.outputs.projectPrincipalId
   }
   dependsOn: [

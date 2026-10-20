@@ -848,3 +848,7 @@ Created automatically by the template (no post-deployment step needed):
 - [Private Endpoint Documentation](https://learn.microsoft.com/en-us/azure/private-link/)
 - [RBAC Documentation](https://learn.microsoft.com/en-us/azure/role-based-access-control/)
 - [Network Security Best Practices](https://learn.microsoft.com/en-us/azure/security/fundamentals/network-best-practices)
+
+## Agent tracing (Application Insights)
+
+This template deploys Application Insights behind an Azure Monitor Private Link Scope and grants the project managed identity read access for evaluation. Set `deployApplicationInsights=false` to skip these resources and their cost (default `true`). Bringing an existing Application Insights is not yet supported for private templates.

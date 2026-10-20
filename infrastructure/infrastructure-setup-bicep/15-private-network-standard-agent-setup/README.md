@@ -907,3 +907,7 @@ that already exists. Keep these points in mind:
   capability host has the agent subnet (from the original `main.bicep`
   deployment), every project under that account inherits agent-subnet security.
   You run this lighter template per project, not the full setup.
+
+## Agent tracing (Application Insights)
+
+This template deploys Application Insights behind an Azure Monitor Private Link Scope and grants the project managed identity read access for evaluation. Set `deployApplicationInsights=false` to skip these resources and their cost (default `true`). Bringing an existing Application Insights is not yet supported for private templates.

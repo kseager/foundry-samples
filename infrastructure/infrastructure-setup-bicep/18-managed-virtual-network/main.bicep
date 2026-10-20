@@ -77,6 +77,9 @@ param developerIpCidr string = ''
 //@description('Optional: Resource group containing existing private DNS zones. If specified, DNS zones will not be created.')
 //param existingDnsZonesResourceGroup string = ''
 
+@description('Deploy Application Insights with an Azure Monitor Private Link Scope, connect it to the project, and grant the project managed identity read access so agent traces can be viewed and evaluated. Set false to skip tracing resources and their cost. Default true.')
+param deployApplicationInsights bool = true
+
 @description('Object mapping DNS zone names to their resource group, or empty string to indicate creation')
 param existingDnsZones object = {
   'privatelink.services.ai.azure.com': ''
@@ -277,7 +280,7 @@ resource acrContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2
 
 // Azure Monitor Private Link Scope (AMPLS) for Application Insights telemetry
 // This enables hosted agents to export traces/telemetry to App Insights via private network
-module ampls 'modules-network-secured/azure-monitor-private-link.bicep' = {
+module ampls 'modules-network-secured/azure-monitor-private-link.bicep' = if (deployApplicationInsights) {
   name: 'ampls-${uniqueSuffix}-deployment'
   params: {
     location: location
@@ -316,7 +319,7 @@ module managedNetwork 'modules-network-secured/managed-network.bicep' = {
     storageAccountResourceId: storage.id
     cosmosDBResourceId: cosmosDB.id
     aiSearchResourceId: aiSearch.id
-    amplsResourceId: ampls.outputs.amplsResourceId
+    amplsResourceId: deployApplicationInsights ? ampls.outputs.amplsResourceId : ''
     acrResourceId: enableContainerRegistry ? acr.outputs.acrId : ''
   }
   dependsOn: [
@@ -391,9 +394,9 @@ module aiProject 'modules-network-secured/ai-project-identity.bicep' = {
     azureStorageResourceGroupName: aiDependencies.outputs.azureStorageResourceGroupName
 
     // Application Insights for telemetry
-    appInsightsName: ampls.outputs.appInsightsName
-    appInsightsConnectionString: ampls.outputs.appInsightsConnectionString
-    appInsightsResourceId: ampls.outputs.appInsightsResourceId
+    appInsightsName: deployApplicationInsights ? ampls.outputs.appInsightsName : ''
+    appInsightsConnectionString: deployApplicationInsights ? ampls.outputs.appInsightsConnectionString : ''
+    appInsightsResourceId: deployApplicationInsights ? ampls.outputs.appInsightsResourceId : ''
 
     // dependent resources
     accountName: aiAccount.outputs.accountName
@@ -525,4 +528,14 @@ resource acrPullRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
   dependsOn: [
     acr
   ]
+}
+
+// Grant the project managed identity read access on Application Insights so agent traces
+// (including GenAI content) can be queried back for evaluation.
+module applicationInsightsRoleAssignment 'modules-network-secured/application-insights-role-assignment.bicep' = if (deployApplicationInsights) {
+  name: 'app-insights-ra-${uniqueSuffix}-deployment'
+  params: {
+    appInsightsName: ampls.outputs.appInsightsName
+    projectPrincipalId: aiProject.outputs.projectPrincipalId
+  }
 }

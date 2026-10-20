@@ -73,6 +73,7 @@ resource connection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01
 }
 
 @description('Resource ID of the Application Insights component.')
+output appInsightsName string = appInsights.name
 output appInsightsId string = appInsights.id
 
 @description('Application ID of the Application Insights component (for trace queries).')

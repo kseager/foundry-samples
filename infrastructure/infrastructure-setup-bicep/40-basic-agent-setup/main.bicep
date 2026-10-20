@@ -17,6 +17,19 @@ param projectDisplayName string = 'project_display_name'
 param deploymentTimestamp string = utcNow('yyyyMMddHHmmss')
 var uniqueSuffix = substring(uniqueString('${resourceGroup().id}-${deploymentTimestamp}'), 0, 4)
 var accountName = toLower('${aiServicesName}${uniqueSuffix}')
+
+@description('Deploy a Log Analytics workspace + Application Insights, connect them to the Foundry account, and grant the project managed identity read access so agent traces can be viewed and evaluated. Adds resources/cost. Default true.')
+param deployApplicationInsights bool = true
+
+@description('Optional full ARM resource ID of an existing workspace-based Application Insights component to connect instead of creating a new one. Ignored when deployApplicationInsights is false. The component is not modified; the deployer needs permission to assign roles on it.')
+param existingApplicationInsightsResourceId string = ''
+
+var appInsightsName = toLower('${uniqueSuffix}appinsights')
+var appInsightsPassedIn = existingApplicationInsightsResourceId != ''
+var appInsightsParts = split(existingApplicationInsightsResourceId, '/')
+var appInsightsSubscriptionId = appInsightsPassedIn ? appInsightsParts[2] : subscription().subscriptionId
+var appInsightsResourceGroupName = appInsightsPassedIn ? appInsightsParts[4] : resourceGroup().name
+var targetAppInsightsName = appInsightsPassedIn ? appInsightsParts[8] : appInsightsName
 @allowed([
   'australiaeast'
   'canadaeast'
@@ -123,6 +136,33 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
       version: modelVersion
     }
   }
+}
+
+// Application Insights + Foundry connection (agent tracing), gated by deployApplicationInsights
+module applicationInsights 'modules-basic/application-insights.bicep' = if (deployApplicationInsights) {
+  name: 'app-insights-${uniqueSuffix}-deployment'
+  params: {
+    location: location
+    aiAccountName: account.name
+    logAnalyticsName: toLower('${uniqueSuffix}loganalytics')
+    appInsightsName: appInsightsName
+    existingApplicationInsightsResourceId: existingApplicationInsightsResourceId
+  }
+  dependsOn: [
+    project
+  ]
+}
+
+module applicationInsightsRoleAssignment 'modules-basic/application-insights-role-assignment.bicep' = if (deployApplicationInsights) {
+  name: 'app-insights-ra-${uniqueSuffix}-deployment'
+  scope: resourceGroup(appInsightsSubscriptionId, appInsightsResourceGroupName)
+  params: {
+    appInsightsName: targetAppInsightsName
+    projectPrincipalId: project.identity.principalId
+  }
+  dependsOn: [
+    applicationInsights
+  ]
 }
 
 output accountName string = account.name

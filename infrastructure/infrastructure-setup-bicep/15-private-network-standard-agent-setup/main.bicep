@@ -162,6 +162,9 @@ param existingDnsZones object = {
   'privatelink.azurecr.io': ''
 }
 
+@description('Deploy a Log Analytics workspace + Application Insights (with Azure Monitor Private Link Scope) and grant the project managed identity read access so agent traces can be viewed and evaluated. Set false to skip tracing resources and their cost. Default true.')
+param deployApplicationInsights bool = true
+
 @description('Object mapping Azure Monitor private DNS zone names to the resource group of an existing zone, or empty string to create it. Use to bring your own centralized Private DNS Zones (e.g. an Azure Landing Zone connectivity subscription) for agent tracing.')
 param existingMonitorDnsZones object = {
   'privatelink.monitor.azure.com': ''
@@ -406,7 +409,7 @@ module acr 'modules-network-secured/container-registry.bicep' = if (enableContai
 
 // Application Insights for hosted-agent tracing (this template ships none). Creates a
 // workspace-based Application Insights and connects it to the account so the agent exports traces.
-module applicationInsights 'modules-network-secured/application-insights.bicep' = {
+module applicationInsights 'modules-network-secured/application-insights.bicep' = if (deployApplicationInsights) {
   name: 'app-insights-${uniqueSuffix}-deployment'
   params: {
     location: location
@@ -418,7 +421,7 @@ module applicationInsights 'modules-network-secured/application-insights.bicep' 
 
 // Private trace ingestion path (Azure Monitor Private Link Scope) so an in-VNet agent's traces
 // reach Application Insights over the private link rather than the (disabled) public endpoint.
-module monitorPrivateLink 'modules-network-secured/monitor-private-link-scope.bicep' = {
+module monitorPrivateLink 'modules-network-secured/monitor-private-link-scope.bicep' = if (deployApplicationInsights) {
   name: 'monitor-pls-${uniqueSuffix}-deployment'
   params: {
     location: location
@@ -589,7 +592,7 @@ dependsOn: [
 }
 
 // Grant the project managed identity read access on the tracing Application Insights (for evaluation)
-module applicationInsightsRoleAssignment 'modules-network-secured/application-insights-role-assignment.bicep' = {
+module applicationInsightsRoleAssignment 'modules-network-secured/application-insights-role-assignment.bicep' = if (deployApplicationInsights) {
   name: 'app-insights-ra-${uniqueSuffix}-deployment'
   params: {
     appInsightsName: applicationInsights.outputs.appInsightsName
