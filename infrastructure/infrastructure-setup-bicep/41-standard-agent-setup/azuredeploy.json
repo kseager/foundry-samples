@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.48.1.52935",
-      "templateHash": "1185738438841548772"
+      "version": "0.44.1.10279",
+      "templateHash": "15348866302693417435"
     }
   },
   "parameters": {
@@ -142,13 +142,6 @@
         "description": "Deploy a Log Analytics workspace + Application Insights, connect them to the Foundry account, and grant the project managed identity read access so evaluation can read agent traces (incl. GenAI content). Adds resources/cost. Default true."
       }
     },
-    "existingApplicationInsightsResourceId": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Optional full ARM resource ID of an existing workspace-based Application Insights component to connect instead of creating a new one. Ignored when deployApplicationInsights is false. The component is not modified; the deployer needs permission to assign roles on it."
-      }
-    },
     "deploymentTimestamp": {
       "type": "string",
       "defaultValue": "[utcNow('yyyyMMddHHmmss')]"
@@ -163,11 +156,6 @@
     "azureStorageName": "[toLower(format('{0}storage', variables('uniqueSuffix')))]",
     "appInsightsName": "[toLower(format('{0}appinsights', variables('uniqueSuffix')))]",
     "logAnalyticsName": "[toLower(format('{0}loganalytics', variables('uniqueSuffix')))]",
-    "appInsightsPassedIn": "[not(equals(parameters('existingApplicationInsightsResourceId'), ''))]",
-    "appInsightsParts": "[split(parameters('existingApplicationInsightsResourceId'), '/')]",
-    "appInsightsSubscriptionId": "[if(variables('appInsightsPassedIn'), variables('appInsightsParts')[2], subscription().subscriptionId)]",
-    "appInsightsResourceGroupName": "[if(variables('appInsightsPassedIn'), variables('appInsightsParts')[4], resourceGroup().name)]",
-    "targetAppInsightsName": "[if(variables('appInsightsPassedIn'), variables('appInsightsParts')[8], variables('appInsightsName'))]",
     "storagePassedIn": "[not(equals(parameters('azureStorageAccountResourceId'), ''))]",
     "searchPassedIn": "[not(equals(parameters('aiSearchResourceId'), ''))]",
     "cosmosPassedIn": "[not(equals(parameters('azureCosmosDBAccountResourceId'), ''))]",
@@ -208,8 +196,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "15129487894493931452"
+              "version": "0.44.1.10279",
+              "templateHash": "5524546880706253961"
             }
           },
           "parameters": {
@@ -335,8 +323,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "4716103122303432596"
+              "version": "0.44.1.10279",
+              "templateHash": "12565875579636383865"
             }
           },
           "parameters": {
@@ -583,8 +571,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "16657861490634546077"
+              "version": "0.44.1.10279",
+              "templateHash": "7645162787034040694"
             }
           },
           "parameters": {
@@ -739,8 +727,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "3981492183356508665"
+              "version": "0.44.1.10279",
+              "templateHash": "6117256850627512682"
             }
           },
           "parameters": {
@@ -913,8 +901,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "1747222649329411"
+              "version": "0.44.1.10279",
+              "templateHash": "3421890076151369374"
             }
           },
           "parameters": {
@@ -965,9 +953,6 @@
           },
           "appInsightsName": {
             "value": "[variables('appInsightsName')]"
-          },
-          "existingApplicationInsightsResourceId": {
-            "value": "[parameters('existingApplicationInsightsResourceId')]"
           }
         },
         "template": {
@@ -976,15 +961,15 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "3417224605351904051"
+              "version": "0.44.1.10279",
+              "templateHash": "3441142233675378556"
             }
           },
           "parameters": {
             "location": {
               "type": "string",
               "metadata": {
-                "description": "Azure region for the tracing resources (new resources only)."
+                "description": "Azure region for the tracing resources."
               }
             },
             "aiAccountName": {
@@ -996,33 +981,18 @@
             "logAnalyticsName": {
               "type": "string",
               "metadata": {
-                "description": "Name of the Log Analytics workspace to create (ignored when reusing an existing component)."
+                "description": "Name of the Log Analytics workspace to create."
               }
             },
             "appInsightsName": {
               "type": "string",
               "metadata": {
-                "description": "Name of the Application Insights component to create (ignored when reusing an existing component)."
-              }
-            },
-            "existingApplicationInsightsResourceId": {
-              "type": "string",
-              "defaultValue": "",
-              "metadata": {
-                "description": "Optional full ARM resource ID of an existing workspace-based Application Insights component. When set, no Log Analytics workspace or component is created."
+                "description": "Name of the Application Insights component to create."
               }
             }
           },
-          "variables": {
-            "useExisting": "[not(empty(parameters('existingApplicationInsightsResourceId')))]",
-            "existingParts": "[split(parameters('existingApplicationInsightsResourceId'), '/')]",
-            "targetSubscriptionId": "[if(variables('useExisting'), variables('existingParts')[2], subscription().subscriptionId)]",
-            "targetResourceGroupName": "[if(variables('useExisting'), variables('existingParts')[4], resourceGroup().name)]",
-            "targetAppInsightsName": "[if(variables('useExisting'), variables('existingParts')[8], parameters('appInsightsName'))]"
-          },
           "resources": [
             {
-              "condition": "[not(variables('useExisting'))]",
               "type": "Microsoft.OperationalInsights/workspaces",
               "apiVersion": "2023-09-01",
               "name": "[parameters('logAnalyticsName')]",
@@ -1035,7 +1005,6 @@
               }
             },
             {
-              "condition": "[not(variables('useExisting'))]",
               "type": "Microsoft.Insights/components",
               "apiVersion": "2020-02-02",
               "name": "[parameters('appInsightsName')]",
@@ -1057,15 +1026,15 @@
               "name": "[format('{0}/{1}', parameters('aiAccountName'), format('{0}-appinsights', parameters('aiAccountName')))]",
               "properties": {
                 "category": "AppInsights",
-                "target": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName'))]",
+                "target": "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]",
                 "authType": "ApiKey",
                 "isSharedToAll": true,
                 "credentials": {
-                  "key": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName')), '2020-02-02').ConnectionString]"
+                  "key": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').ConnectionString]"
                 },
                 "metadata": {
                   "ApiType": "Azure",
-                  "ResourceId": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName'))]"
+                  "ResourceId": "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]"
                 }
               },
               "dependsOn": [
@@ -1079,42 +1048,28 @@
               "metadata": {
                 "description": "Name of the Application Insights component."
               },
-              "value": "[variables('targetAppInsightsName')]"
-            },
-            "appInsightsSubscriptionId": {
-              "type": "string",
-              "metadata": {
-                "description": "Subscription ID that contains the Application Insights component."
-              },
-              "value": "[variables('targetSubscriptionId')]"
-            },
-            "appInsightsResourceGroupName": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource group that contains the Application Insights component."
-              },
-              "value": "[variables('targetResourceGroupName')]"
+              "value": "[parameters('appInsightsName')]"
             },
             "appInsightsId": {
               "type": "string",
               "metadata": {
                 "description": "Resource ID of the Application Insights component."
               },
-              "value": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName'))]"
+              "value": "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]"
             },
             "appInsightsAppId": {
               "type": "string",
               "metadata": {
                 "description": "Application ID of the Application Insights component (for trace queries)."
               },
-              "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName')), '2020-02-02').AppId]"
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').AppId]"
             },
             "logAnalyticsId": {
               "type": "string",
               "metadata": {
                 "description": "Resource ID of the Log Analytics workspace backing Application Insights."
               },
-              "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName')), '2020-02-02').WorkspaceResourceId]"
+              "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName'))]"
             }
           }
         }
@@ -1128,8 +1083,6 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "[format('app-insights-ra-{0}-deployment', variables('uniqueSuffix'))]",
-      "subscriptionId": "[variables('appInsightsSubscriptionId')]",
-      "resourceGroup": "[variables('appInsightsResourceGroupName')]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -1137,7 +1090,7 @@
         "mode": "Incremental",
         "parameters": {
           "appInsightsName": {
-            "value": "[variables('targetAppInsightsName')]"
+            "value": "[variables('appInsightsName')]"
           },
           "projectPrincipalId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('ai-{0}-{1}-deployment', variables('projectName'), variables('uniqueSuffix'))), '2025-04-01').outputs.projectPrincipalId.value]"
@@ -1149,8 +1102,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "293823928903208822"
+              "version": "0.44.1.10279",
+              "templateHash": "11992714550927002792"
             }
           },
           "parameters": {
@@ -1226,8 +1179,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "8744662750066182354"
+              "version": "0.44.1.10279",
+              "templateHash": "5322883668661759738"
             }
           },
           "parameters": {
@@ -1283,8 +1236,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "10973283064825697347"
+              "version": "0.44.1.10279",
+              "templateHash": "1319098613063424337"
             }
           },
           "parameters": {
@@ -1347,8 +1300,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "2539642872561371152"
+              "version": "0.44.1.10279",
+              "templateHash": "6103261316579938375"
             }
           },
           "parameters": {
@@ -1436,8 +1389,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "16768837253817333290"
+              "version": "0.44.1.10279",
+              "templateHash": "11209650417667659124"
             }
           },
           "parameters": {
@@ -1536,8 +1489,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "10290238885493201832"
+              "version": "0.44.1.10279",
+              "templateHash": "1735356790233715529"
             }
           },
           "parameters": {
@@ -1615,8 +1568,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.48.1.52935",
-              "templateHash": "6938123025399968272"
+              "version": "0.44.1.10279",
+              "templateHash": "10552108385245653621"
             }
           },
           "parameters": {

@@ -34,8 +34,6 @@ By default (`deployApplicationInsights = true`) this template also:
     - **Log Analytics Reader** — read the trace/telemetry data.
     - **Privileged Monitoring Data Reader** — required to query the GenAI prompt/response content.
 
-To connect an **existing workspace-based** Application Insights instead of creating one, set `existingApplicationInsightsResourceId` to its full resource ID. No Log Analytics workspace or component is created and the existing component is not modified; only the Foundry connection and project roles are added (the deployer needs permission to assign roles on it).
-
 To keep the setup minimal (no Log Analytics / Application Insights resources and no telemetry RBAC), deploy with `deployApplicationInsights=false`:
 
 ```bash
