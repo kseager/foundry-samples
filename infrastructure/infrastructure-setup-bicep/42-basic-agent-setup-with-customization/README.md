@@ -55,6 +55,8 @@ By default (`deployApplicationInsights = true`) this template also:
 - Deploys a **Log Analytics workspace** and a **workspace-based Application Insights** component and connects it to the Foundry account, so agents export OpenTelemetry traces.
 - Grants the **project managed identity** **Log Analytics Reader** and **Privileged Monitoring Data Reader** on the component so evaluation can read traces, including GenAI prompt/response content.
 
+**Additional deployment permission:** with `deployApplicationInsights=true` (the default), the deploying identity also needs `Microsoft.Authorization/roleAssignments/write` on the Application Insights component or an ancestor scope, for example **Owner**, or **Contributor** plus **Role Based Access Control Administrator** at the resource-group scope. **Contributor** alone is not sufficient for the default deployment.
+
 This adds Log Analytics / Application Insights cost. Deploy with `deployApplicationInsights=false` to skip
 all tracing resources and RBAC:
 
