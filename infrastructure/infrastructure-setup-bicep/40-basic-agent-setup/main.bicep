@@ -21,15 +21,8 @@ var accountName = toLower('${aiServicesName}${uniqueSuffix}')
 @description('Deploy a Log Analytics workspace + Application Insights, connect them to the Foundry account, and grant the project managed identity read access so agent traces can be viewed and evaluated. Adds resources/cost. Default true.')
 param deployApplicationInsights bool = true
 
-@description('Optional full ARM resource ID of an existing workspace-based Application Insights component to connect instead of creating a new one. Ignored when deployApplicationInsights is false. The component is not modified; the deployer needs permission to assign roles on it.')
-param existingApplicationInsightsResourceId string = ''
-
 var appInsightsName = toLower('${uniqueSuffix}appinsights')
-var appInsightsPassedIn = existingApplicationInsightsResourceId != ''
-var appInsightsParts = split(existingApplicationInsightsResourceId, '/')
-var appInsightsSubscriptionId = appInsightsPassedIn ? appInsightsParts[2] : subscription().subscriptionId
-var appInsightsResourceGroupName = appInsightsPassedIn ? appInsightsParts[4] : resourceGroup().name
-var targetAppInsightsName = appInsightsPassedIn ? appInsightsParts[8] : appInsightsName
+var logAnalyticsName = toLower('${uniqueSuffix}loganalytics')
 @allowed([
   'australiaeast'
   'canadaeast'
@@ -144,9 +137,8 @@ module applicationInsights 'modules-basic/application-insights.bicep' = if (depl
   params: {
     location: location
     aiAccountName: account.name
-    logAnalyticsName: toLower('${uniqueSuffix}loganalytics')
+    logAnalyticsName: logAnalyticsName
     appInsightsName: appInsightsName
-    existingApplicationInsightsResourceId: existingApplicationInsightsResourceId
   }
   dependsOn: [
     project
@@ -155,9 +147,8 @@ module applicationInsights 'modules-basic/application-insights.bicep' = if (depl
 
 module applicationInsightsRoleAssignment 'modules-basic/application-insights-role-assignment.bicep' = if (deployApplicationInsights) {
   name: 'app-insights-ra-${uniqueSuffix}-deployment'
-  scope: resourceGroup(appInsightsSubscriptionId, appInsightsResourceGroupName)
   params: {
-    appInsightsName: targetAppInsightsName
+    appInsightsName: appInsightsName
     projectPrincipalId: project.identity.principalId
   }
   dependsOn: [
@@ -168,3 +159,6 @@ module applicationInsightsRoleAssignment 'modules-basic/application-insights-rol
 output accountName string = account.name
 output projectName string = project.name
 output accountEndpoint string = account.properties.endpoint
+output applicationInsightsResourceId string = deployApplicationInsights ? applicationInsights.outputs.appInsightsId : ''
+output applicationInsightsAppId string = deployApplicationInsights ? applicationInsights.outputs.appInsightsAppId : ''
+output logAnalyticsWorkspaceId string = deployApplicationInsights ? applicationInsights.outputs.logAnalyticsId : ''
