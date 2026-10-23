@@ -19,15 +19,8 @@ var account_name = toLower('${ai_services}${uniqueSuffix}')
 @sys.description('Deploy a Log Analytics workspace + Application Insights, connect them to the Foundry account, and grant the project managed identity read access so agent traces can be viewed and evaluated. Adds resources/cost. Default true.')
 param deployApplicationInsights bool = true
 
-@sys.description('Optional full ARM resource ID of an existing workspace-based Application Insights component to connect instead of creating a new one. Ignored when deployApplicationInsights is false. The component is not modified; the deployer needs permission to assign roles on it.')
-param existingApplicationInsightsResourceId string = ''
-
 var appInsightsName = toLower('${uniqueSuffix}appinsights')
-var appInsightsPassedIn = existingApplicationInsightsResourceId != ''
-var appInsightsParts = split(existingApplicationInsightsResourceId, '/')
-var appInsightsSubscriptionId = appInsightsPassedIn ? appInsightsParts[2] : subscription().subscriptionId
-var appInsightsResourceGroupName = appInsightsPassedIn ? appInsightsParts[4] : resourceGroup().name
-var targetAppInsightsName = appInsightsPassedIn ? appInsightsParts[8] : appInsightsName
+var logAnalyticsName = toLower('${uniqueSuffix}loganalytics')
 /*
   Step 1: Create a Cognitive Services Account and deployment an agent compatible model
   
@@ -83,9 +76,8 @@ module applicationInsights 'modules/application-insights.bicep' = if (deployAppl
   params: {
     location: location
     aiAccountName: aiAccount.outputs.account_name
-    logAnalyticsName: toLower('${uniqueSuffix}loganalytics')
+    logAnalyticsName: logAnalyticsName
     appInsightsName: appInsightsName
-    existingApplicationInsightsResourceId: existingApplicationInsightsResourceId
   }
   dependsOn: [
     aiProject
@@ -94,9 +86,8 @@ module applicationInsights 'modules/application-insights.bicep' = if (deployAppl
 
 module applicationInsightsRoleAssignment 'modules/application-insights-role-assignment.bicep' = if (deployApplicationInsights) {
   name: 'app-insights-ra-${uniqueSuffix}-deployment'
-  scope: resourceGroup(appInsightsSubscriptionId, appInsightsResourceGroupName)
   params: {
-    appInsightsName: targetAppInsightsName
+    appInsightsName: appInsightsName
     projectPrincipalId: aiProject.outputs.projectPrincipalId
   }
   dependsOn: [

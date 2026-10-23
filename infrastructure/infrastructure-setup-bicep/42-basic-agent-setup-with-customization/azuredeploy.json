@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.48.1.52935",
-      "templateHash": "13052406438665494901"
+      "templateHash": "7200235384495896128"
     }
   },
   "parameters": {
@@ -27,13 +27,6 @@
       "defaultValue": true,
       "metadata": {
         "description": "Deploy a Log Analytics workspace + Application Insights, connect them to the Foundry account, and grant the project managed identity read access so agent traces can be viewed and evaluated. Adds resources/cost. Default true."
-      }
-    },
-    "existingApplicationInsightsResourceId": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Optional full ARM resource ID of an existing workspace-based Application Insights component to connect instead of creating a new one. Ignored when deployApplicationInsights is false. The component is not modified; the deployer needs permission to assign roles on it."
       }
     },
     "project_name": {
@@ -102,11 +95,7 @@
     "accountName": "[format('{0}{1}', parameters('account_name'), substring(uniqueString(parameters('azureDeployName')), 0, 4))]",
     "uniqueSuffix": "[substring(uniqueString(parameters('azureDeployName')), 0, 4)]",
     "appInsightsName": "[toLower(format('{0}appinsights', variables('uniqueSuffix')))]",
-    "appInsightsPassedIn": "[not(equals(parameters('existingApplicationInsightsResourceId'), ''))]",
-    "appInsightsParts": "[split(parameters('existingApplicationInsightsResourceId'), '/')]",
-    "appInsightsSubscriptionId": "[if(variables('appInsightsPassedIn'), variables('appInsightsParts')[2], subscription().subscriptionId)]",
-    "appInsightsResourceGroupName": "[if(variables('appInsightsPassedIn'), variables('appInsightsParts')[4], resourceGroup().name)]",
-    "targetAppInsightsName": "[if(variables('appInsightsPassedIn'), variables('appInsightsParts')[8], variables('appInsightsName'))]",
+    "logAnalyticsName": "[toLower(format('{0}loganalytics', variables('uniqueSuffix')))]",
     "byoAoaiConnectionName": "aoaiConnection",
     "existingAoaiResourceIdParts": "[split(parameters('existingAoaiResourceId'), '/')]",
     "existingAoaiResourceIdSubId": "[variables('existingAoaiResourceIdParts')[2]]",
@@ -226,13 +215,10 @@
             "value": "[variables('accountName')]"
           },
           "logAnalyticsName": {
-            "value": "[toLower(format('{0}loganalytics', variables('uniqueSuffix')))]"
+            "value": "[variables('logAnalyticsName')]"
           },
           "appInsightsName": {
             "value": "[variables('appInsightsName')]"
-          },
-          "existingApplicationInsightsResourceId": {
-            "value": "[parameters('existingApplicationInsightsResourceId')]"
           }
         },
         "template": {
@@ -242,7 +228,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.48.1.52935",
-              "templateHash": "3417224605351904051"
+              "templateHash": "6849636845524896305"
             }
           },
           "parameters": {
@@ -261,33 +247,18 @@
             "logAnalyticsName": {
               "type": "string",
               "metadata": {
-                "description": "Name of the Log Analytics workspace to create (ignored when reusing an existing component)."
+                "description": "Name of the Log Analytics workspace to create."
               }
             },
             "appInsightsName": {
               "type": "string",
               "metadata": {
-                "description": "Name of the Application Insights component to create (ignored when reusing an existing component)."
-              }
-            },
-            "existingApplicationInsightsResourceId": {
-              "type": "string",
-              "defaultValue": "",
-              "metadata": {
-                "description": "Optional full ARM resource ID of an existing workspace-based Application Insights component. When set, no Log Analytics workspace or component is created."
+                "description": "Name of the Application Insights component to create."
               }
             }
           },
-          "variables": {
-            "useExisting": "[not(empty(parameters('existingApplicationInsightsResourceId')))]",
-            "existingParts": "[split(parameters('existingApplicationInsightsResourceId'), '/')]",
-            "targetSubscriptionId": "[if(variables('useExisting'), variables('existingParts')[2], subscription().subscriptionId)]",
-            "targetResourceGroupName": "[if(variables('useExisting'), variables('existingParts')[4], resourceGroup().name)]",
-            "targetAppInsightsName": "[if(variables('useExisting'), variables('existingParts')[8], parameters('appInsightsName'))]"
-          },
           "resources": [
             {
-              "condition": "[not(variables('useExisting'))]",
               "type": "Microsoft.OperationalInsights/workspaces",
               "apiVersion": "2023-09-01",
               "name": "[parameters('logAnalyticsName')]",
@@ -300,7 +271,6 @@
               }
             },
             {
-              "condition": "[not(variables('useExisting'))]",
               "type": "Microsoft.Insights/components",
               "apiVersion": "2020-02-02",
               "name": "[parameters('appInsightsName')]",
@@ -322,15 +292,15 @@
               "name": "[format('{0}/{1}', parameters('aiAccountName'), format('{0}-appinsights', parameters('aiAccountName')))]",
               "properties": {
                 "category": "AppInsights",
-                "target": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName'))]",
+                "target": "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]",
                 "authType": "ApiKey",
                 "isSharedToAll": true,
                 "credentials": {
-                  "key": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName')), '2020-02-02').ConnectionString]"
+                  "key": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').ConnectionString]"
                 },
                 "metadata": {
                   "ApiType": "Azure",
-                  "ResourceId": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName'))]"
+                  "ResourceId": "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]"
                 }
               },
               "dependsOn": [
@@ -344,42 +314,28 @@
               "metadata": {
                 "description": "Name of the Application Insights component."
               },
-              "value": "[variables('targetAppInsightsName')]"
-            },
-            "appInsightsSubscriptionId": {
-              "type": "string",
-              "metadata": {
-                "description": "Subscription ID that contains the Application Insights component."
-              },
-              "value": "[variables('targetSubscriptionId')]"
-            },
-            "appInsightsResourceGroupName": {
-              "type": "string",
-              "metadata": {
-                "description": "Resource group that contains the Application Insights component."
-              },
-              "value": "[variables('targetResourceGroupName')]"
+              "value": "[parameters('appInsightsName')]"
             },
             "appInsightsId": {
               "type": "string",
               "metadata": {
                 "description": "Resource ID of the Application Insights component."
               },
-              "value": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName'))]"
+              "value": "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]"
             },
             "appInsightsAppId": {
               "type": "string",
               "metadata": {
                 "description": "Application ID of the Application Insights component (for trace queries)."
               },
-              "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName')), '2020-02-02').AppId]"
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').AppId]"
             },
             "logAnalyticsId": {
               "type": "string",
               "metadata": {
                 "description": "Resource ID of the Log Analytics workspace backing Application Insights."
               },
-              "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('targetSubscriptionId'), variables('targetResourceGroupName')), 'Microsoft.Insights/components', variables('targetAppInsightsName')), '2020-02-02').WorkspaceResourceId]"
+              "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName'))]"
             }
           }
         }
@@ -394,8 +350,6 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "[format('app-insights-ra-{0}-deployment', variables('uniqueSuffix'))]",
-      "subscriptionId": "[variables('appInsightsSubscriptionId')]",
-      "resourceGroup": "[variables('appInsightsResourceGroupName')]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -403,7 +357,7 @@
         "mode": "Incremental",
         "parameters": {
           "appInsightsName": {
-            "value": "[variables('targetAppInsightsName')]"
+            "value": "[variables('appInsightsName')]"
           },
           "projectPrincipalId": {
             "value": "[reference('project', '2025-04-01-preview', 'full').identity.principalId]"

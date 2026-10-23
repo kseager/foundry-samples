@@ -50,20 +50,9 @@ By default (`deployApplicationInsights = true`) this template also:
 - Deploys a **Log Analytics workspace** and a **workspace-based Application Insights** component and connects it to the Foundry account, so agents export OpenTelemetry traces.
 - Grants the **project managed identity** **Log Analytics Reader** and **Privileged Monitoring Data Reader** on the component so evaluation can read traces, including GenAI prompt/response content.
 
-This adds Log Analytics / Application Insights cost. Options:
-
-| Parameter | Default | Effect |
-|---|---|---|
-| `deployApplicationInsights` | `true` | `false` skips all tracing resources and RBAC. |
-| `existingApplicationInsightsResourceId` | `''` | Full resource ID of an existing **workspace-based** Application Insights component. No Log Analytics / component is created and the existing component is not modified; only the Foundry connection and project roles are added. The deployer needs permission to assign roles on it (e.g. Owner or User Access Administrator). |
+This adds Log Analytics / Application Insights cost. Deploy with `deployApplicationInsights=false` to skip
+all tracing resources and RBAC:
 
 ```bash
-# Use an existing Application Insights
-az deployment group create --resource-group <rg> --template-file main.bicep \
-  --parameters existingApplicationInsightsResourceId=/subscriptions/<sub>/resourceGroups/<rg>/providers/microsoft.insights/components/<name>
-
-# Skip Application Insights
 az deployment group create --resource-group <rg> --template-file main.bicep --parameters deployApplicationInsights=false
 ```
-
-To add tracing to an existing Foundry resource instead, see [01-connections/connection-application-insights.bicep](../01-connections/connection-application-insights.bicep).
