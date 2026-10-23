@@ -137,7 +137,7 @@ resource acrOutboundRule 'Microsoft.CognitiveServices/accounts/managedNetworks/o
     }
     category: 'UserDefined'
   }
-  dependsOn: [amplsOutboundRule]
+  dependsOn: [aiSearchOutboundRule, amplsOutboundRule]
 }
 
 // Outbound service-tag rule for the Agent365 (A365) observability/tracing endpoint

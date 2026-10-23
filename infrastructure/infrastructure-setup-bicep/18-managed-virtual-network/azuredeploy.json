@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.48.1.52935",
-      "templateHash": "9308004345356487116"
+      "templateHash": "7909453733292156459"
     }
   },
   "parameters": {
@@ -2047,7 +2047,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.48.1.52935",
-              "templateHash": "1245017095447106109"
+              "templateHash": "15385224020310310388"
             }
           },
           "parameters": {
@@ -2213,6 +2213,7 @@
                 "category": "UserDefined"
               },
               "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts/managedNetworks/outboundRules', parameters('accountName'), 'default', 'aisearch-rule')]",
                 "[resourceId('Microsoft.CognitiveServices/accounts/managedNetworks/outboundRules', parameters('accountName'), 'default', 'ampls-monitor-rule')]",
                 "[resourceId('Microsoft.CognitiveServices/accounts/managedNetworks', parameters('accountName'), 'default')]"
               ]
