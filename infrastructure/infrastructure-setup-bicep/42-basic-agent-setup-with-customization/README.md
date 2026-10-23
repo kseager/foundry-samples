@@ -59,5 +59,7 @@ This adds Log Analytics / Application Insights cost. Deploy with `deployApplicat
 all tracing resources and RBAC:
 
 ```bash
-az deployment group create --resource-group <rg> --template-file main.bicep --parameters deployApplicationInsights=false
+az deployment group create --resource-group <rg> --template-file main.bicep \
+  --parameters existingAoaiResourceId='/subscriptions/<sub-id>/resourceGroups/<rg-name>/providers/Microsoft.CognitiveServices/accounts/<aoai-name>' \
+               deployApplicationInsights=false
 ```
