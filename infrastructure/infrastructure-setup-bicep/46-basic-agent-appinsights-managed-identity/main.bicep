@@ -23,8 +23,11 @@ param deployApplicationInsights bool = true
 @description('Optional full ARM resource ID of an existing workspace-based Application Insights component to link instead of creating a new one. Ignored when deployApplicationInsights is false. The component is not modified; the deployer needs permission to assign roles on it.')
 param existingApplicationInsightsResourceId string = ''
 
-@description('Assign the project managed identity its roles on Application Insights. Set false only to test the connection-only experience; without the roles the project cannot read or write telemetry. Default true.')
+@description('Assign the roles on Application Insights (project managed identity: Monitoring Metrics Publisher; optional user: Log Analytics Reader). Set false only to test the connection-only experience. Default true.')
 param assignProjectMonitoringRoles bool = true
+
+@description('Object ID of the user who views traces; granted Log Analytics Reader on Application Insights. Get yours with: az ad signed-in-user show --query id -o tsv. Leave empty to skip.')
+param userPrincipalId string = ''
 var appInsightsName = toLower('${uniqueSuffix}appinsights')
 var appInsightsPassedIn = existingApplicationInsightsResourceId != ''
 var appInsightsParts = split(existingApplicationInsightsResourceId, '/')
@@ -150,13 +153,14 @@ module applicationInsightsConnection 'modules/application-insights-connection.bi
   }
 }
 
-// Project managed identity roles, scoped to Application Insights
+// Project managed identity (write) and viewing user (read) roles, scoped to Application Insights
 module applicationInsightsRoleAssignment 'modules/application-insights-role-assignment.bicep' = if (deployApplicationInsights && assignProjectMonitoringRoles) {
   name: 'app-insights-ra-${uniqueSuffix}-deployment'
   scope: resourceGroup(appInsightsSubscriptionId, appInsightsResourceGroupName)
   params: {
     appInsightsName: targetAppInsightsName
     projectPrincipalId: project.identity.principalId
+    userPrincipalId: userPrincipalId
   }
   dependsOn: [
     applicationInsights

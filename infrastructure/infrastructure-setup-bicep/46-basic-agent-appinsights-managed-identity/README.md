@@ -12,7 +12,7 @@ traces and verifies the interaction is retrievable.
 | Foundry account + project + `gpt-4.1` deployment | Basic agent setup, platform-managed agent state |
 | Log Analytics + Application Insights | `DisableLocalAuth=true`, provisioned in parallel with the account and project |
 | Project connection | `category: AppInsights`, `authType: ProjectManagedIdentity`, connection string in metadata |
-| Roles on Application Insights for the project managed identity | Log Analytics Reader, Privileged Monitoring Data Reader, Monitoring Metrics Publisher |
+| Roles on Application Insights | Project managed identity: Monitoring Metrics Publisher (write). Deploying user, if `userPrincipalId` is set: Log Analytics Reader (the portal queries traces as the user) |
 
 ### Parameters
 
@@ -20,14 +20,16 @@ traces and verifies the interaction is retrievable.
 |---|---|---|
 | `deployApplicationInsights` | `true` | Set `false` to deploy without any tracing resources |
 | `existingApplicationInsightsResourceId` | `''` | Link an existing workspace-based component instead of creating one. It is not modified; the deployer needs permission to assign roles on it. For managed identity ingestion to be enforced, set `DisableLocalAuth=true` on it |
+| `userPrincipalId` | `''` | Object ID of the user who views traces; granted Log Analytics Reader on the component. Use `az ad signed-in-user show --query id -o tsv`. Empty skips the grant |
 | `location` | `eastus2` | Region |
 
 The deployer needs `Microsoft.Authorization/roleAssignments/write` on the Application Insights component (for example Owner or User Access Administrator).
 
 ## Hosted agent identity (data plane, after deployment)
 
-Agent identities do not exist when the template runs, so Bicep cannot grant them access. After the hosted
-agent is created, assign its identity **Monitoring Metrics Publisher** on the component:
+Agent identities do not exist when the template runs, so Bicep cannot grant them access. This optional
+script assigns Monitoring Metrics Publisher to an agent identity. It is not required for the measured
+platform `invoke_agent` and `chat` spans; their project-MI-only result is listed under **Tested** below.
 
 ```bash
 python scripts/assign_agent_identity_role.py --app-insights-id <applicationInsightsResourceId> --principal-id <agent identity object id>
@@ -42,7 +44,7 @@ python scripts/assign_agent_identity_role.py --app-insights-id <applicationInsig
    ```
    Outputs include `projectEndpoint`, `applicationInsightsResourceId` and `applicationInsightsAppId`.
 2. Deploy the hosted agent in `agent/` with `azd` 1.27.1+ and the `azure.ai.agents` extension. Set `FOUNDRY_PROJECT_ENDPOINT` and `FOUNDRY_PROJECT_ID` in the azd environment to the existing project (`azd env set ...`), then run `azd deploy` from `agent/`. `azd ai agent show <agent>` prints the agent's `Instance Identity Principal ID`.
-3. Grant the agent identity the role (above), passing that principal id to `scripts/assign_agent_identity_role.py`.
+3. Optionally grant the agent identity the role (above), passing that principal id to `scripts/assign_agent_identity_role.py`.
 4. Verify:
    ```bash
    pip install requests azure-identity
@@ -52,7 +54,7 @@ python scripts/assign_agent_identity_role.py --app-insights-id <applicationInsig
 
 ## Tested
 
-Deployed to westus3 (eastus2 had no account quota): connection `ProjectManagedIdentity`, three roles on the component, `DisableLocalAuth=true`. The hosted agent deployed with azd, and an invocation produced `invoke_agent` and `chat` spans in `dependencies`, found by `verify_traces.py`. Spans also appeared in a run made before the agent identity role was assigned, so the platform's own span export did not depend on that role in this test. The agent's own telemetry (`traces`, `requests`) also lands in the component.
+Deployed to westus3 (eastus2 had no account quota) with the earlier role set (project managed identity holding Log Analytics Reader, Privileged Monitoring Data Reader and Monitoring Metrics Publisher): connection `ProjectManagedIdentity`, three roles on the component, `DisableLocalAuth=true`. The current template grants the project managed identity only Monitoring Metrics Publisher and the user Log Analytics Reader; that revised role set has not been redeployed. The hosted agent deployed with azd, and an invocation produced `invoke_agent` and `chat` spans in `dependencies`, found by `verify_traces.py`.
 
 ### Bring-your-own Application Insights (hosted agent, observed)
 
@@ -60,11 +62,12 @@ Tested with `existingApplicationInsightsResourceId` pointing at a component in a
 
 | Roles on the component | Platform spans |
 |---|---|
-| None | Not seen (the agent's own `traces` and `exceptions` still arrive) |
+| None | Not seen |
 | Agent identity only: Monitoring Metrics Publisher | Not seen |
-| Agent identity and project managed identity: Monitoring Metrics Publisher | Seen |
+| Project managed identity only: Monitoring Metrics Publisher | Seen for both prompt and hosted agents |
+| Agent identity and project managed identity: Monitoring Metrics Publisher | Seen for hosted agents |
 
-Project-managed-identity-only was not tested, so which of the two identities gates the platform spans is not isolated. Prompt agents produced no telemetry with no roles and with the agent identity role. The Traces page in the Foundry portal loaded for the signed-in user with the project managed identity holding no roles, which is consistent with the portal querying as the user. Read-side role requirements for the project managed identity were not tested.
+Prompt-agent data uses no hosted-agent identity. The Traces page in the Foundry portal loaded for the signed-in user with the project managed identity holding no roles, which is consistent with the portal querying as the user. Read-side role requirements for the project managed identity were not tested.
 
 ## Notes
 

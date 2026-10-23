@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.48.1.52935",
-      "templateHash": "6049377302686322365"
+      "templateHash": "9082410267654870978"
     }
   },
   "parameters": {
@@ -60,7 +60,14 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Assign the project managed identity its roles on Application Insights. Set false only to test the connection-only experience; without the roles the project cannot read or write telemetry. Default true."
+        "description": "Assign the roles on Application Insights (project managed identity: Monitoring Metrics Publisher; optional user: Log Analytics Reader). Set false only to test the connection-only experience. Default true."
+      }
+    },
+    "userPrincipalId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Object ID of the user who views traces; granted Log Analytics Reader on Application Insights. Get yours with: az ad signed-in-user show --query id -o tsv. Leave empty to skip."
       }
     },
     "location": {
@@ -460,6 +467,9 @@
           },
           "projectPrincipalId": {
             "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts/projects', variables('accountName'), parameters('projectName')), '2025-04-01-preview', 'full').identity.principalId]"
+          },
+          "userPrincipalId": {
+            "value": "[parameters('userPrincipalId')]"
           }
         },
         "template": {
@@ -469,7 +479,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.48.1.52935",
-              "templateHash": "7782165536338341458"
+              "templateHash": "13299488038671956217"
             }
           },
           "parameters": {
@@ -485,32 +495,40 @@
                 "description": "Principal (object) ID of the project managed identity."
               }
             },
-            "roleDefinitionGuids": {
-              "type": "array",
-              "defaultValue": [
-                "73c42c96-874c-492b-b04d-ab87d138a893",
-                "dbc9c667-e97f-4491-aee6-90b9cf960190",
-                "3913510d-42f4-4e42-8a64-420c390055eb"
-              ],
+            "userPrincipalId": {
+              "type": "string",
+              "defaultValue": "",
               "metadata": {
-                "description": "Built-in role definition GUIDs to assign to the project managed identity."
+                "description": "Object ID of the user who will view traces. Leave empty to skip the user grant."
               }
             }
           },
+          "variables": {
+            "metricsPublisherRoleGuid": "3913510d-42f4-4e42-8a64-420c390055eb",
+            "logAnalyticsReaderRoleGuid": "73c42c96-874c-492b-b04d-ab87d138a893"
+          },
           "resources": [
             {
-              "copy": {
-                "name": "appInsightsRoleAssignments",
-                "count": "[length(parameters('roleDefinitionGuids'))]"
-              },
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2022-04-01",
               "scope": "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]",
-              "name": "[guid(parameters('projectPrincipalId'), parameters('roleDefinitionGuids')[copyIndex()], resourceId('Microsoft.Insights/components', parameters('appInsightsName')))]",
+              "name": "[guid(parameters('projectPrincipalId'), variables('metricsPublisherRoleGuid'), resourceId('Microsoft.Insights/components', parameters('appInsightsName')))]",
               "properties": {
                 "principalId": "[parameters('projectPrincipalId')]",
-                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', parameters('roleDefinitionGuids')[copyIndex()])]",
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('metricsPublisherRoleGuid'))]",
                 "principalType": "ServicePrincipal"
+              }
+            },
+            {
+              "condition": "[not(empty(parameters('userPrincipalId')))]",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]",
+              "name": "[guid(parameters('userPrincipalId'), variables('logAnalyticsReaderRoleGuid'), resourceId('Microsoft.Insights/components', parameters('appInsightsName')))]",
+              "properties": {
+                "principalId": "[parameters('userPrincipalId')]",
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('logAnalyticsReaderRoleGuid'))]",
+                "principalType": "User"
               }
             }
           ]
