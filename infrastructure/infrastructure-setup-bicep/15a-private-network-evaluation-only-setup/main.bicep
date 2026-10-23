@@ -121,9 +121,6 @@ param dnsZoneNames array = [
   'privatelink.azurecr.io'
 ]
 
-@description('Deploy a Log Analytics workspace + Application Insights (with Azure Monitor Private Link Scope) and grant the project managed identity read access so agent traces can be viewed and evaluated. Set false to skip tracing resources and their cost. Default true.')
-param deployApplicationInsights bool = true
-
 @description('Object mapping Azure Monitor private DNS zone names to the resource group of an existing zone, or empty string to create it. Use to bring your own centralized Private DNS Zones (e.g. an Azure Landing Zone connectivity subscription) for evaluation/agent tracing.')
 param existingMonitorDnsZones object = {
   'privatelink.monitor.azure.com': ''
@@ -350,7 +347,7 @@ module storageContainersRoleAssignment 'modules-network-secured/blob-storage-con
   Creates a workspace-based Application Insights and connects it to the account so evaluation
   runs and agents export metrics/results/OpenTelemetry traces here.
 */
-module applicationInsights 'modules-network-secured/application-insights.bicep' = if (deployApplicationInsights) {
+module applicationInsights 'modules-network-secured/application-insights.bicep' = {
   name: 'app-insights-${uniqueSuffix}-deployment'
   params: {
     location: location
@@ -367,7 +364,7 @@ module applicationInsights 'modules-network-secured/application-insights.bicep' 
   Private trace ingestion path (Azure Monitor Private Link Scope) so ingestion to Application
   Insights stays on the private link rather than the (disabled) public endpoint.
 */
-module monitorPrivateLink 'modules-network-secured/monitor-private-link-scope.bicep' = if (deployApplicationInsights) {
+module monitorPrivateLink 'modules-network-secured/monitor-private-link-scope.bicep' = {
   name: 'monitor-pls-${uniqueSuffix}-deployment'
   params: {
     location: location
@@ -385,7 +382,7 @@ module monitorPrivateLink 'modules-network-secured/monitor-private-link-scope.bi
   Grant the project managed identity read access on the Application Insights resource so
   evaluation can query GenAI trace content back.
 */
-module applicationInsightsRoleAssignment 'modules-network-secured/application-insights-role-assignment.bicep' = if (deployApplicationInsights) {
+module applicationInsightsRoleAssignment 'modules-network-secured/application-insights-role-assignment.bicep' = {
   name: 'app-insights-ra-${uniqueSuffix}-deployment'
   params: {
     appInsightsName: applicationInsights.outputs.appInsightsName

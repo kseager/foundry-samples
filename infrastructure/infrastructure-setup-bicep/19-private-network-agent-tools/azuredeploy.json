@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.48.1.52935",
-      "templateHash": "3843901559784700663"
+      "templateHash": "12502011471561009023"
     }
   },
   "parameters": {
@@ -299,13 +299,6 @@
       },
       "metadata": {
         "description": "Map of private DNS zone FQDNs to an object `{ subscriptionId, resourceGroup }` describing where the zone lives. Empty `resourceGroup` means \"create the zone in this deployment's resource group\". A non-empty `resourceGroup` references an existing zone in that RG; empty `subscriptionId` defaults to the current subscription, otherwise the zone is referenced cross-subscription. Note: when referencing an existing zone, the VNet link to that zone is NOT managed by this template — the caller must ensure the zone is already linked to the target VNet."
-      }
-    },
-    "deployApplicationInsights": {
-      "type": "bool",
-      "defaultValue": true,
-      "metadata": {
-        "description": "Deploy a Log Analytics workspace + Application Insights (with Azure Monitor Private Link Scope) and grant the project managed identity read access so agent traces can be viewed and evaluated. Set false to skip tracing resources and their cost. Default true."
       }
     },
     "existingMonitorDnsZones": {
@@ -2768,7 +2761,6 @@
       ]
     },
     {
-      "condition": "[parameters('deployApplicationInsights')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "[format('app-insights-{0}-deployment', variables('uniqueSuffix'))]",
@@ -2930,7 +2922,6 @@
       ]
     },
     {
-      "condition": "[parameters('deployApplicationInsights')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "[format('monitor-pls-{0}-deployment', variables('uniqueSuffix'))]",
@@ -3910,7 +3901,6 @@
       ]
     },
     {
-      "condition": "[parameters('deployApplicationInsights')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "[format('app-insights-ra-{0}-deployment', variables('uniqueSuffix'))]",

@@ -441,7 +441,3 @@ modules-network-secured/
 - [Microsoft Foundry Networking Documentation](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/configure-private-link?tabs=azure-portal&pivots=fdp-project)
 - [Private Endpoint Documentation](https://learn.microsoft.com/en-us/azure/private-link/)
 - [Network Security Best Practices](https://learn.microsoft.com/en-us/azure/security/fundamentals/network-best-practices)
-
-## Agent tracing (Application Insights)
-
-This template deploys Application Insights behind an Azure Monitor Private Link Scope and grants the project managed identity read access for evaluation. Set `deployApplicationInsights=false` to skip these resources and their cost (default `true`). Bringing an existing Application Insights is not yet supported for private templates.

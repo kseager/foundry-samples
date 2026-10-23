@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.48.1.52935",
-      "templateHash": "12922817570280043146"
+      "templateHash": "9328187809481599539"
     }
   },
   "parameters": {
@@ -244,13 +244,6 @@
       },
       "metadata": {
         "description": "Object mapping DNS zone names to their resource group, or empty string to indicate creation"
-      }
-    },
-    "deployApplicationInsights": {
-      "type": "bool",
-      "defaultValue": true,
-      "metadata": {
-        "description": "Deploy a Log Analytics workspace + Application Insights (with Azure Monitor Private Link Scope) and grant the project managed identity read access so agent traces can be viewed and evaluated. Set false to skip tracing resources and their cost. Default true."
       }
     },
     "existingMonitorDnsZones": {
@@ -2446,7 +2439,6 @@
       ]
     },
     {
-      "condition": "[parameters('deployApplicationInsights')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "[format('app-insights-{0}-deployment', variables('uniqueSuffix'))]",
@@ -2608,7 +2600,6 @@
       ]
     },
     {
-      "condition": "[parameters('deployApplicationInsights')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "[format('monitor-pls-{0}-deployment', variables('uniqueSuffix'))]",
@@ -3651,7 +3642,6 @@
       ]
     },
     {
-      "condition": "[parameters('deployApplicationInsights')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "[format('app-insights-ra-{0}-deployment', variables('uniqueSuffix'))]",

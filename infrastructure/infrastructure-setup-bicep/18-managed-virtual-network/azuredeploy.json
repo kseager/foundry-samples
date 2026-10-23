@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.48.1.52935",
-      "templateHash": "16344643040982235413"
+      "templateHash": "9308004345356487116"
     }
   },
   "parameters": {
@@ -165,13 +165,6 @@
       "defaultValue": "",
       "metadata": {
         "description": "Optional developer IP CIDR to allowlist for ACR push access (e.g., 203.0.113.0/26 or 10.0.0.0/16). When empty, public access remains disabled."
-      }
-    },
-    "deployApplicationInsights": {
-      "type": "bool",
-      "defaultValue": true,
-      "metadata": {
-        "description": "Deploy Application Insights with an Azure Monitor Private Link Scope, connect it to the project, and grant the project managed identity read access so agent traces can be viewed and evaluated. Set false to skip tracing resources and their cost. Default true."
       }
     },
     "existingDnsZones": {
@@ -1504,7 +1497,6 @@
       ]
     },
     {
-      "condition": "[parameters('deployApplicationInsights')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "[format('ampls-{0}-deployment', variables('uniqueSuffix'))]",
@@ -2043,7 +2035,9 @@
           "aiSearchResourceId": {
             "value": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', reference(resourceId('Microsoft.Resources/deployments', format('dependencies-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.aiSearchServiceSubscriptionId.value, reference(resourceId('Microsoft.Resources/deployments', format('dependencies-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.aiSearchServiceResourceGroupName.value), 'Microsoft.Search/searchServices', reference(resourceId('Microsoft.Resources/deployments', format('dependencies-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.aiSearchName.value)]"
           },
-          "amplsResourceId": "[if(parameters('deployApplicationInsights'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('ampls-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.amplsResourceId.value), createObject('value', ''))]",
+          "amplsResourceId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('ampls-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.amplsResourceId.value]"
+          },
           "acrResourceId": "[if(parameters('enableContainerRegistry'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('acr-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.acrId.value), createObject('value', ''))]"
         },
         "template": {
@@ -2949,9 +2943,15 @@
           "azureStorageResourceGroupName": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('dependencies-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.azureStorageResourceGroupName.value]"
           },
-          "appInsightsName": "[if(parameters('deployApplicationInsights'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('ampls-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.appInsightsName.value), createObject('value', ''))]",
-          "appInsightsConnectionString": "[if(parameters('deployApplicationInsights'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('ampls-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.appInsightsConnectionString.value), createObject('value', ''))]",
-          "appInsightsResourceId": "[if(parameters('deployApplicationInsights'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', format('ampls-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.appInsightsResourceId.value), createObject('value', ''))]",
+          "appInsightsName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('ampls-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.appInsightsName.value]"
+          },
+          "appInsightsConnectionString": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('ampls-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.appInsightsConnectionString.value]"
+          },
+          "appInsightsResourceId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('ampls-{0}-deployment', variables('uniqueSuffix'))), '2025-04-01').outputs.appInsightsResourceId.value]"
+          },
           "accountName": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('ai-{0}-{1}-deployment', variables('accountName'), variables('uniqueSuffix'))), '2025-04-01').outputs.accountName.value]"
           }
@@ -3667,7 +3667,6 @@
       ]
     },
     {
-      "condition": "[parameters('deployApplicationInsights')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "[format('app-insights-ra-{0}-deployment', variables('uniqueSuffix'))]",
