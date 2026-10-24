@@ -526,13 +526,3 @@ resource acrPullRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
     acr
   ]
 }
-
-// Grant the project managed identity read access on Application Insights so agent traces
-// (including GenAI content) can be queried back for evaluation.
-module applicationInsightsRoleAssignment 'modules-network-secured/application-insights-role-assignment.bicep' = {
-  name: 'app-insights-ra-${uniqueSuffix}-deployment'
-  params: {
-    appInsightsName: ampls.outputs.appInsightsName
-    projectPrincipalId: aiProject.outputs.projectPrincipalId
-  }
-}

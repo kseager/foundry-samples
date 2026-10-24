@@ -305,16 +305,6 @@ module addProjectCapabilityHost 'modules-network-secured/add-project-capability-
   ]
 }
 
-// Grant the project managed identity read access on Application Insights so agent traces
-// (including GenAI content) can be queried back for evaluation.
-module applicationInsightsRoleAssignment 'modules-network-secured/application-insights-role-assignment.bicep' = {
-  name: 'app-insights-ra-${uniqueSuffix}-deployment'
-  params: {
-    appInsightsName: applicationInsights.outputs.appInsightsName
-    projectPrincipalId: project.identity.principalId
-  }
-}
-
 output accountId string = aiAccount.outputs.accountID
 output accountName string = aiAccount.outputs.accountName
 output projectName string = project.name

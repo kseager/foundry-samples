@@ -17,8 +17,8 @@ param cosmosDBResourceId string
 @description('Resource ID of the AI Search Service for outbound PE rule')
 param aiSearchResourceId string
 
-@description('Resource ID of the Azure Monitor Private Link Scope for telemetry. When empty, no AMPLS outbound rule is created.')
-param amplsResourceId string = ''
+@description('Resource ID of the Azure Monitor Private Link Scope for telemetry')
+param amplsResourceId string
 
 @description('Resource ID of the Azure Container Registry for outbound PE rule. When empty, no ACR outbound rule is created.')
 param acrResourceId string = ''
@@ -109,7 +109,7 @@ resource aiSearchOutboundRule 'Microsoft.CognitiveServices/accounts/managedNetwo
 // Outbound PE rule for Azure Monitor Private Link Scope (AMPLS)
 // This allows the hosted agent to export telemetry to Application Insights privately
 #disable-next-line BCP081
-resource amplsOutboundRule 'Microsoft.CognitiveServices/accounts/managedNetworks/outboundRules@2025-10-01-preview' = if (!empty(amplsResourceId)) {
+resource amplsOutboundRule 'Microsoft.CognitiveServices/accounts/managedNetworks/outboundRules@2025-10-01-preview' = {
   parent: managedNetwork
   name: 'ampls-monitor-rule'
   properties: {
@@ -137,7 +137,7 @@ resource acrOutboundRule 'Microsoft.CognitiveServices/accounts/managedNetworks/o
     }
     category: 'UserDefined'
   }
-  dependsOn: [aiSearchOutboundRule, amplsOutboundRule]
+  dependsOn: [amplsOutboundRule]
 }
 
 // Outbound service-tag rule for the Agent365 (A365) observability/tracing endpoint
