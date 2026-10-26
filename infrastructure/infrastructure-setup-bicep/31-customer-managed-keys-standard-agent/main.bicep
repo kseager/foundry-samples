@@ -106,7 +106,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
 // This module will create new agent dependent resources
 // A Cosmos DB account, an AI Search Service, and a Storage Account are created if they do not already exist
 module aiDependencies 'modules-standard/standard-dependent-resources.bicep' = {
-  name: 'dependencies-${accountName}-${uniqueSuffix}-deployment'
+  name: 'deps-${uniqueSuffix}-deployment'
   params: {
     location: location
     azureStorageName: azureStorageName
