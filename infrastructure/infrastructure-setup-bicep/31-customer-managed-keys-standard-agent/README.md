@@ -54,5 +54,7 @@ This adds Log Analytics / Application Insights cost. Deploy with `deployApplicat
 all tracing resources and RBAC:
 
 ```bash
-az deployment group create --resource-group <rg> --template-file main.bicep --parameters deployApplicationInsights=false
+az deployment group create --resource-group <rg> --template-file main.bicep \
+    --parameters keyVaultName="{KEY_VAULT_NAME}" keyName="{KEY_NAME}" keyVersion="{KEY_VERSION}" \
+                 deployApplicationInsights=false
 ```
