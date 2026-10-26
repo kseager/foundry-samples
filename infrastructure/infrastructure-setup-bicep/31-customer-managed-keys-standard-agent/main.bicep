@@ -39,9 +39,9 @@ var uniqueSuffix = substring(uniqueString('${resourceGroup().id}-${deploymentTim
 
 var accountName = toLower('${aiFoundryName}${uniqueSuffix}')
 
-var cosmosDBName = toLower('${take(aiFoundryName, 28)}${uniqueSuffix}cosmosdb')
+var cosmosDBName = toLower('${take(aiFoundryName, 32)}${uniqueSuffix}cosmosdb')
 var aiSearchName = toLower('${aiFoundryName}${uniqueSuffix}search')
-var azureStorageName = toLower('${take(replace(aiFoundryName, '-', ''), 12)}${uniqueSuffix}storage')
+var azureStorageName = toLower('${take(replace(aiFoundryName, '-', ''), 13)}${uniqueSuffix}storage')
 
 @description('Deploy a Log Analytics workspace + Application Insights, connect them to the Foundry account, and grant the project managed identity read access so agent traces can be viewed and evaluated. Adds resources/cost. Default true.')
 param deployApplicationInsights bool = true

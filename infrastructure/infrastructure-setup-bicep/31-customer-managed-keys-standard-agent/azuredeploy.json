@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.48.1.52935",
-      "templateHash": "8798266550044308257"
+      "templateHash": "8505258743153728514"
     }
   },
   "parameters": {
@@ -97,9 +97,9 @@
     "keyVaultKeyUri": "[format('{0}keys/{1}', variables('keyVaultUri'), parameters('keyName'))]",
     "uniqueSuffix": "[substring(uniqueString(format('{0}-{1}', resourceGroup().id, parameters('deploymentTimestamp'))), 0, 4)]",
     "accountName": "[toLower(format('{0}{1}', parameters('aiFoundryName'), variables('uniqueSuffix')))]",
-    "cosmosDBName": "[toLower(format('{0}{1}cosmosdb', take(parameters('aiFoundryName'), 28), variables('uniqueSuffix')))]",
+    "cosmosDBName": "[toLower(format('{0}{1}cosmosdb', take(parameters('aiFoundryName'), 32), variables('uniqueSuffix')))]",
     "aiSearchName": "[toLower(format('{0}{1}search', parameters('aiFoundryName'), variables('uniqueSuffix')))]",
-    "azureStorageName": "[toLower(format('{0}{1}storage', take(replace(parameters('aiFoundryName'), '-', ''), 12), variables('uniqueSuffix')))]",
+    "azureStorageName": "[toLower(format('{0}{1}storage', take(replace(parameters('aiFoundryName'), '-', ''), 13), variables('uniqueSuffix')))]",
     "appInsightsName": "[toLower(format('{0}appinsights', variables('uniqueSuffix')))]",
     "logAnalyticsName": "[toLower(format('{0}loganalytics', variables('uniqueSuffix')))]",
     "storagePassedIn": "[not(equals(parameters('azureStorageAccountResourceId'), ''))]",
