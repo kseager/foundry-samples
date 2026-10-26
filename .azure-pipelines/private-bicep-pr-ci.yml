@@ -371,6 +371,13 @@ stages:
                       --query 'key.kid' -o tsv)"
                     ci_key_version="${ci_key_uri##*/}"
 
+                    # The CI vault is new, so grant the Cosmos DB first-party app the key access the sample's Cosmos CMK needs
+                    az keyvault set-policy \
+                      --name "$unique_key_vault_name" \
+                      --object-id a232010e-820c-4083-83bb-3ace5fc29d0b \
+                      --key-permissions get wrapKey unwrapKey \
+                      --only-show-errors >/dev/null || return 1
+
                     if [ -z "$ci_key_version" ]; then
                       echo "##vso[task.logissue type=error]Could not resolve CI Key Vault key version for $unique_key_vault_name."
                       return 1
