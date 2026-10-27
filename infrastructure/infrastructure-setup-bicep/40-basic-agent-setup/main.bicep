@@ -1,6 +1,6 @@
 // Basic agent setup 
 @description('The name of the Azure AI Foundry resource.')
-@maxLength(9)
+@maxLength(60)
 param aiServicesName string = 'foundy'
 
 @description('The name of your project')
