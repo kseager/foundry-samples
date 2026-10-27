@@ -48,7 +48,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 
 // Foundry account connection (category AppInsights) so the agent exports OTel traces here.
 resource connection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01-preview' = {
-  name: '${aiAccountName}-appinsights'
+  name: 'appinsights'
   parent: aiAccount
   properties: {
     category: 'AppInsights'
